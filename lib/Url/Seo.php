@@ -32,40 +32,51 @@ class Seo
 
     public function getTitleTag()
     {
-        return $this->isUrl() ? '<title>' . htmlspecialchars($this->normalize($this->data->seoTitle)) . '</title>' : $this->rewriterSeo->{$this->rewriter->getSeoTitleTagMethod()}();
+        if ($this->isUrl())
+        {
+            \rex_extension::register('YREWRITE_TITLE', function ($params) {
+                $subject = $params->getSubject();
+                $subject = str_replace($params->getParam('title'), htmlspecialchars($this->normalize($this->data->seoTitle)), $subject);
+                return $subject;
+            });
+        }
+        return $this->rewriterSeo->{$this->rewriter->getSeoTitleTagMethod()}();
     }
 
     public function getDescriptionTag()
     {
-        return $this->isUrl() ? '<meta name="description" content="'.htmlspecialchars($this->normalize($this->data->seoDescription)).'" />' : $this->rewriterSeo->{$this->rewriter->getSeoDescriptionTagMethod()}();
+        if ($this->isUrl())
+        {
+            \rex_extension::register('YREWRITE_DESCRIPTION', function ($params) {
+                return htmlspecialchars($this->normalize($this->data->seoDescription));
+            });
+        }
+        return $this->rewriterSeo->{$this->rewriter->getSeoDescriptionTagMethod()}();
     }
 
-    public function getCanonicalTag()
+    public function getCanonicalUrlTag()
     {
-        return $this->isUrl() ? '<link rel="canonical" href="' . $this->data->url . '" />' : $this->rewriterSeo->{$this->rewriter->getSeoCanonicalTagMethod()}();
+        if ($this->isUrl())
+        {
+            \rex_extension::register('YREWRITE_CANONICAL_URL', function ($params) {
+                return $this->data->fullUrl;
+            });
+        }
+        return $this->rewriterSeo->{$this->rewriter->getSeoCanonicalTagMethod()}();
     }
 
     public function getHreflangTags()
     {
         if ($this->isUrl()) {
-            $return = '';
-            $hrefs = [];
-            foreach (\rex_clang::getAll() as $clang) {
-                if ($clang->getId() == \rex_clang::getCurrentId()) {
-                    continue;
+            \rex_extension::register('YREWRITE_HREFLANG_TAGS', function ($params) {
+                $subject = [];
+                foreach (\rex_clang::getAll() as $clang)
+                {
+                    $subject[$clang->getCode()] = Generator::getUrlById($this->dataId, '', $clang->getId());
                 }
-
-                $hrefs[$clang->getCode()] = Generator::getUrlById($this->dataId, '', $clang->getId());
-            }
-
-            if (count($hrefs)) {
-                foreach ($hrefs as $code => $url) {
-                    $return .= '<link rel="alternate" hreflang="' . $code . '" href="' . $url . '" />';
-                }
-            }
-            return $return;
+                return $subject;
+            });
         }
-
         return $this->rewriterSeo->{$this->rewriter->getSeoHreflangTagsMethod()}();
     }
 
