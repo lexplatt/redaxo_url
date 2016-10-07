@@ -28,19 +28,19 @@ class Generator
     public static function getRestrictionOperators()
     {
         return ['=' => '=',
-                 '>' => '>',
-                 '>=' => '>=',
-                 '<' => '<',
-                 '<=' => '<=',
-                 '!=' => '!=',
-                 'LIKE' => 'LIKE',
-                 'NOT LIKE' => 'NOT LIKE',
-                 'IN (...)' => 'IN (...)',
-                 'NOT IN (...)' => 'NOT IN (...)',
-                 'BETWEEN' => 'BETWEEN',
-                 'NOT BETWEEN' => 'NOT BETWEEN',
-                 'FIND_IN_SET' => 'FIND_IN_SET',
-                ];
+                '>' => '>',
+                '>=' => '>=',
+                '<' => '<',
+                '<=' => '<=',
+                '!=' => '!=',
+                'LIKE' => 'LIKE',
+                'NOT LIKE' => 'NOT LIKE',
+                'IN (...)' => 'IN (...)',
+                'NOT IN (...)' => 'NOT IN (...)',
+                'BETWEEN' => 'BETWEEN',
+                'NOT BETWEEN' => 'NOT BETWEEN',
+                'FIND_IN_SET' => 'FIND_IN_SET',
+        ];
     }
 
     public static function mergeDatabaseAndTable($database, $table)
@@ -111,9 +111,9 @@ class Generator
         $url = self::stripRewriterSuffix($url);
         $url .= '/';
         $url .= implode('-', array_map(
-            function ($field) {
-                return Url::getRewriter()->normalize($field);
-            }, $fields)
+                function ($field) {
+                    return Url::getRewriter()->normalize($field);
+                }, $fields)
         );
         $url = self::appendRewriterSuffix($url);
         return $url;
@@ -282,7 +282,6 @@ class Generator
                             $path .= (isset($savePaths[$path])) ? '-' . $entry['id'] : '';
                             $path .= Url::getRewriter()->getSuffix();
 
-
                             $path = \rex_extension::registerPoint(new \rex_extension_point('URL_GENERATOR_PATH_CREATED', $path, ['article_id' => $articleId, 'clang_id' => $clangId, 'data' => $entry, 'table' => $table]));
 
                             $object = new \stdClass();
@@ -317,7 +316,7 @@ class Generator
                                                 str_replace(
                                                     '/', self::$pathSlashPlaceholder,
                                                     $pathNameForUrl))
-                                            ) . Url::getRewriter()->getSuffix();
+                                        ) . Url::getRewriter()->getSuffix();
                                     $object->pathNames[$pathNameForNav] = $urlForPathName->appendPathSegment($pathSegment)->getUrl();
                                     $object->fullPathNames[$pathNameForNav] = $urlForPathName->getFullUrl();
                                 }
@@ -358,7 +357,6 @@ class Generator
                             } else {
                                 $object->seoDescription = '';
                             }
-
 
                             $urlParamKey = (trim($table->urlParamKey) == '') ? self::$pathsNoUrlParamKey : $table->urlParamKey;
 
@@ -516,7 +514,7 @@ class Generator
         return false;
     }
 
-    public static function getUrlById($primaryId, $articleId = null, $clangId = null, $returnFullUrl = false)
+    public static function getUrlById($primaryId, $articleId = null, $clangId = null, $returnFullUrl = false, $urlParamKey = null)
     {
         if ((int) $primaryId < 1) {
             return null;
@@ -527,13 +525,16 @@ class Generator
         if (null === $clangId) {
             $clangId = \rex_clang::getCurrentId();
         }
+        if (null === $urlParamKey) {
+            $urlParamKey = self::$pathsNoUrlParamKey;
+        }
 
         self::ensurePaths();
         $currentUrl = Url::current();
         foreach (self::$paths as $domain => $articleIds) {
             foreach ($articleIds as $article_Id => $urlParamKeys) {
-                foreach ($urlParamKeys as $urlParamKey => $ids) {
-                    if ($article_Id == $articleId && isset($ids[$primaryId][$clangId])) {
+                foreach ($urlParamKeys as $url_ParamKey => $ids) {
+                    if ($article_Id == $articleId && $url_ParamKey == $urlParamKey && isset($ids[$primaryId][$clangId])) {
                         if ($currentUrl->getDomain() == $domain) {
                             if ($returnFullUrl) {
                                 return $articleIds[$articleId][$urlParamKey][$primaryId][$clangId]['fullUrl'];
@@ -543,16 +544,18 @@ class Generator
                             return $currentUrl->setHost($domain)->getSchemeAndHttpHost() . $articleIds[$articleId][$urlParamKey][$primaryId][$clangId]['url'];
                         }
                     } else {
-                        foreach ($urlParamKeys as $urlParamKey => $ids) {
-                            foreach ($ids as $id => $clangIds) {
-                                if ($id == $primaryId) {
-                                    foreach ($clangIds as $clang_Id => $object) {
-                                        if ($clang_Id == $clangId) {
-                                            if (isset($object['pathCategories'][$articleId])) {
-                                                if ($currentUrl->getDomain() == $domain) {
-                                                    return $object['pathCategories'][$articleId];
-                                                } else {
-                                                    return $currentUrl->setHost($domain)->getSchemeAndHttpHost() . $object['pathCategories'][$articleId];
+                        foreach ($urlParamKeys as $url_ParamKey => $ids) {
+                            if ($url_ParamKey == $urlParamKey) {
+                                foreach ($ids as $id => $clangIds) {
+                                    if ($id == $primaryId) {
+                                        foreach ($clangIds as $clang_Id => $object) {
+                                            if ($clang_Id == $clangId) {
+                                                if (isset($object['pathCategories'][$articleId])) {
+                                                    if ($currentUrl->getDomain() == $domain) {
+                                                        return $object['pathCategories'][$articleId];
+                                                    } else {
+                                                        return $currentUrl->setHost($domain)->getSchemeAndHttpHost() . $object['pathCategories'][$articleId];
+                                                    }
                                                 }
                                             }
                                         }
@@ -605,6 +608,7 @@ class Generator
         $articleId = $params['id'];
         $clangId = $params['clang'];
         $primaryId = 0;
+        $urlParamKey = null;
         if (isset($params['params']['id'])) {
             $primaryId = $params['params']['id'];
             unset($params['params']['id']);
@@ -615,6 +619,7 @@ class Generator
                     if ($articleIdFound) {
                         $articleId = $articleIdFound;
                         $primaryId = (int) $value;
+                        $urlParamKey = $key;
                         unset($params['params'][$key]);
                         break;
                     }
@@ -623,7 +628,7 @@ class Generator
         }
 
         if ($primaryId > 0) {
-            $url = self::getUrlById($primaryId, $articleId, $clangId);
+            $url = self::getUrlById($primaryId, $articleId, $clangId, false, $urlParamKey);
             $urlParams = '';
             if (count($params['params'])) {
                 $urlParams = \rex_string::buildQuery($params['params'], $params['separator']);
