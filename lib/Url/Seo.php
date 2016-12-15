@@ -36,11 +36,16 @@ class Seo
         {
             \rex_extension::register('YREWRITE_TITLE', function ($params) {
                 $subject = $params->getSubject();
-                $subject = str_replace($params->getParam('title'), htmlspecialchars($this->normalize($this->data->seoTitle)), $subject);
+                $subject = str_replace($params->getParam('title'), $this->getTitle(), $subject);
                 return $subject;
             });
         }
         return $this->rewriterSeo->{$this->rewriter->getSeoTitleTagMethod()}();
+    }
+
+    public function getTitle()
+    {
+        return $this->normalizeMeta($this->data->seoTitle);
     }
 
     public function getDescriptionTag()
@@ -48,10 +53,15 @@ class Seo
         if ($this->isUrl())
         {
             \rex_extension::register('YREWRITE_DESCRIPTION', function ($params) {
-                return htmlspecialchars($this->normalize($this->data->seoDescription));
+                return $this->getDescription();
             });
         }
         return $this->rewriterSeo->{$this->rewriter->getSeoDescriptionTagMethod()}();
+    }
+
+    public function getDescription()
+    {
+        return $this->normalizeMeta($this->data->seoDescription);
     }
 
     public function getCanonicalUrlTag()
@@ -63,6 +73,11 @@ class Seo
             });
         }
         return $this->rewriterSeo->{$this->rewriter->getSeoCanonicalTagMethod()}();
+    }
+
+    public function getCanonicalUrl()
+    {
+        return $this->rewriter->getFullPath(ltrim($this->data->url, "/"));
     }
 
     public function getHreflangTags()
@@ -85,6 +100,11 @@ class Seo
         return $this->rewriterSeo->{$this->rewriter->getSeoRobotsTagMethod()}();
     }
 
+    public function getImg()
+    {print_r($this->data);
+        return $this->data->img;
+    }
+
     protected function isUrl()
     {
         return ($this->dataId > 0);
@@ -93,6 +113,11 @@ class Seo
     protected function normalize($string)
     {
         return str_replace(["\n", "\r"], [' ',''], $string);
+    }
+
+    protected function normalizeMeta($string)
+    {
+        return htmlspecialchars(strip_tags($this->normalize($string)));
     }
 
     public static function getSitemap()
