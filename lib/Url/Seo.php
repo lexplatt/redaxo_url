@@ -124,11 +124,6 @@ class Seo
         return htmlspecialchars(strip_tags($this->normalize($string)));
     }
 
-    protected function normalizeMeta($string)
-    {
-        return htmlspecialchars(strip_tags($this->normalize($string)));
-    }
-
     public static function getSitemap()
     {
         $sitemap = [];
