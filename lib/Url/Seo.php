@@ -24,17 +24,18 @@ class Seo
 
     public function __construct()
     {
-        $this->rewriter = Url::getRewriter();
+        $this->rewriter    = Url::getRewriter();
         $this->rewriterSeo = $this->rewriter->getSeoInstance();
-        $this->data = Generator::getData();
-        $this->dataId = Generator::getId();
+        $this->data        = Generator::getData();
+        $this->dataId      = Generator::getId();
     }
 
     public function getTitleTag()
     {
         if ($this->isUrl())
         {
-            \rex_extension::register('YREWRITE_TITLE', function ($params) {
+            \rex_extension::register('YREWRITE_TITLE', function ($params)
+            {
                 $subject = $params->getSubject();
                 $subject = str_replace($params->getParam('title'), $this->getTitle(), $subject);
                 return $subject;
@@ -68,7 +69,8 @@ class Seo
     {
         if ($this->isUrl())
         {
-            \rex_extension::register('YREWRITE_CANONICAL_URL', function ($params) {
+            \rex_extension::register('YREWRITE_CANONICAL_URL', function ($params)
+            {
                 return $this->data->fullUrl;
             });
         }
@@ -82,8 +84,10 @@ class Seo
 
     public function getHreflangTags()
     {
-        if ($this->isUrl()) {
-            \rex_extension::register('YREWRITE_HREFLANG_TAGS', function ($params) {
+        if ($this->isUrl())
+        {
+            \rex_extension::register('YREWRITE_HREFLANG_TAGS', function ($params)
+            {
                 $subject = [];
                 foreach (\rex_clang::getAll() as $clang)
                 {
@@ -112,7 +116,12 @@ class Seo
 
     protected function normalize($string)
     {
-        return str_replace(["\n", "\r"], [' ',''], $string);
+        return str_replace(["\n", "\r"], [' ', ''], $string);
+    }
+
+    protected function normalizeMeta($string)
+    {
+        return htmlspecialchars(strip_tags($this->normalize($string)));
     }
 
     protected function normalizeMeta($string)
@@ -123,20 +132,26 @@ class Seo
     public static function getSitemap()
     {
         $sitemap = [];
-        $all = Generator::getAll();
-        if ($all) {
-            foreach ($all as $item) {
-                if ($item->sitemap) {
+        $all     = Generator::getAll();
+        if ($all)
+        {
+            foreach ($all as $item)
+            {
+                if ($item->sitemap)
+                {
                     $lastmod = date(DATE_W3C, time());
-                    if ($item->sitemapLastmod != '') {
-                        $id = Generator::getId($item->fullUrl);
+                    if ($item->sitemapLastmod != '')
+                    {
+                        $id  = Generator::getId($item->fullUrl);
                         $sql = \rex_sql::factory();
-                        $sql->setQuery('SELECT ' . $item->sitemapLastmod . ' AS lastmod FROM ' . $item->table['name'] . ' WHERE ' . $item->table['id'] .' = :id LIMIT 2', ['id' => $id]);
-                        if ($sql->getRows() == 1) {
+                        $sql->setQuery('SELECT ' . $item->sitemapLastmod . ' AS lastmod FROM ' . $item->table['name'] . ' WHERE ' . $item->table['id'] . ' = :id LIMIT 2', ['id' => $id]);
+                        if ($sql->getRows() == 1)
+                        {
                             $timestamp = $sql->getValue('lastmod');
-                            if (strpos($timestamp, '-')) {
+                            if (strpos($timestamp, '-'))
+                            {
                                 // mysql date
-                                $datetime = new \DateTime($timestamp);
+                                $datetime  = new \DateTime($timestamp);
                                 $timestamp = $datetime->getTimestamp();
                             }
                             $lastmod = date(DATE_W3C, $timestamp);
@@ -149,8 +164,10 @@ class Seo
                         "\n" . '<changefreq>' . $item->sitemapFrequency . '</changefreq>' .
                         "\n" . '<priority>' . $item->sitemapPriority . '</priority>' .
                         "\n" . '</url>';
-                    if (count($item->fullPathNames)) {
-                        foreach ($item->fullPathNames as $path) {
+                    if (count($item->fullPathNames))
+                    {
+                        foreach ($item->fullPathNames as $path)
+                        {
                             $sitemap[] =
                                 "\n" . '<url>' .
                                 "\n" . '<loc>' . $path . '</loc>' .
@@ -160,8 +177,10 @@ class Seo
                                 "\n" . '</url>';
                         }
                     }
-                    if (count($item->fullPathCategories)) {
-                        foreach ($item->fullPathCategories as $path) {
+                    if (count($item->fullPathCategories))
+                    {
+                        foreach ($item->fullPathCategories as $path)
+                        {
                             $sitemap[] =
                                 "\n" . '<url>' .
                                 "\n" . '<loc>' . $path . '</loc>' .
