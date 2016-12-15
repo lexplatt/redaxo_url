@@ -37,32 +37,23 @@ class Seo
             \rex_extension::register('YREWRITE_TITLE', function ($params)
             {
                 $subject = $params->getSubject();
-                $subject = str_replace($params->getParam('title'), $this->getTitle(), $subject);
+                $subject = str_replace($params->getParam('title'), $this->normalizeMeta($this->data->seoTitle), $subject);
                 return $subject;
             });
         }
         return $this->rewriterSeo->{$this->rewriter->getSeoTitleTagMethod()}();
     }
 
-    public function getTitle()
-    {
-        return $this->normalizeMeta($this->data->seoTitle);
-    }
-
     public function getDescriptionTag()
     {
         if ($this->isUrl())
         {
-            \rex_extension::register('YREWRITE_DESCRIPTION', function ($params) {
-                return $this->getDescription();
+            \rex_extension::register('YREWRITE_DESCRIPTION', function ($params)
+            {
+                return $this->normalizeMeta($this->data->seoDescription);
             });
         }
         return $this->rewriterSeo->{$this->rewriter->getSeoDescriptionTagMethod()}();
-    }
-
-    public function getDescription()
-    {
-        return $this->normalizeMeta($this->data->seoDescription);
     }
 
     public function getCanonicalUrlTag()
@@ -77,11 +68,6 @@ class Seo
         return $this->rewriterSeo->{$this->rewriter->getSeoCanonicalTagMethod()}();
     }
 
-    public function getCanonicalUrl()
-    {
-        return $this->rewriter->getFullPath(ltrim($this->data->url, "/"));
-    }
-
     public function getHreflangTags()
     {
         if ($this->isUrl())
@@ -89,9 +75,16 @@ class Seo
             \rex_extension::register('YREWRITE_HREFLANG_TAGS', function ($params)
             {
                 $subject = [];
+
                 foreach (\rex_clang::getAll() as $clang)
                 {
-                    $subject[$clang->getCode()] = Generator::getUrlById($this->dataId, '', $clang->getId());
+                    $url = Generator::getUrlById($this->dataId, $this->data->articleId, $clang->getId(), TRUE, $this->data->urlParamKey);
+
+                    // filter non existing urls - TODO: review
+                    if (!preg_match('!.*//$!', $url))
+                    {
+                        $subject[$clang->getCode()] = $url;
+                    }
                 }
                 return $subject;
             });
@@ -105,7 +98,7 @@ class Seo
     }
 
     public function getImg()
-    {print_r($this->data);
+    {
         return $this->data->img;
     }
 
@@ -121,7 +114,7 @@ class Seo
 
     protected function normalizeMeta($string)
     {
-        return htmlspecialchars(strip_tags($this->normalize($string)));
+        return html_entity_decode(strip_tags($this->normalize($string)));
     }
 
     public static function getSitemap()
