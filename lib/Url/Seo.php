@@ -86,12 +86,17 @@ class Seo
 
                 foreach (\rex_clang::getAll() as $clang)
                 {
-                    $url = Generator::getUrlById($this->dataId, $this->data->articleId, $clang->getId(), TRUE, $this->data->urlParamKey);
+                    $article = \rex_article::get($this->data->articleId, $clang->getId());
 
-                    // filter non existing urls - TODO: review
-                    if (!preg_match('!.*//$!', $url))
+                    if ($article->getValue('status') == 1)
                     {
-                        $subject[$clang->getCode()] = $url;
+                        $url = Generator::getUrlById($this->dataId, $this->data->articleId, $clang->getId(), TRUE, $this->data->urlParamKey);
+
+                        // filter non existing urls - TODO: review
+                        if (!preg_match('!.*//$!', $url))
+                        {
+                            $subject[$clang->getCode()] = $url;
+                        }
                     }
                 }
                 return $subject;
