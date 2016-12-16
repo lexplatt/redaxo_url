@@ -16,9 +16,11 @@ class Seo
     /**
      * @var \Url\Rewriter\Rewriter
      */
-    private $rewriter;
+    protected $rewriter;
 
-    private $rewriterSeo;
+    protected $rewriterSeo;
+
+    protected $data;
 
     private $dataId;
 
@@ -26,13 +28,18 @@ class Seo
     {
         $this->rewriter    = Url::getRewriter();
         $this->rewriterSeo = $this->rewriter->getSeoInstance();
-        $this->data        = Generator::getData();
+        $this->data        = Generator::getData() ?: new \stdClass();
         $this->dataId      = Generator::getId();
+    }
+
+    public function getRewriterSeo()
+    {
+        return $this->rewriterSeo;
     }
 
     public function getTitleTag()
     {
-        if ($this->isUrl())
+        if ($this->data->seoTitle)
         {
             \rex_extension::register('YREWRITE_TITLE', function ($params)
             {
@@ -46,7 +53,7 @@ class Seo
 
     public function getDescriptionTag()
     {
-        if ($this->isUrl())
+        if ($this->data->seoDescription)
         {
             \rex_extension::register('YREWRITE_DESCRIPTION', function ($params)
             {
@@ -58,7 +65,7 @@ class Seo
 
     public function getCanonicalUrlTag()
     {
-        if ($this->isUrl())
+        if ($this->data->fullUrl)
         {
             \rex_extension::register('YREWRITE_CANONICAL_URL', function ($params)
             {
@@ -70,6 +77,7 @@ class Seo
 
     public function getHreflangTags()
     {
+
         if ($this->isUrl())
         {
             \rex_extension::register('YREWRITE_HREFLANG_TAGS', function ($params)
@@ -97,9 +105,21 @@ class Seo
         return $this->rewriterSeo->{$this->rewriter->getSeoRobotsTagMethod()}();
     }
 
-    public function getImg()
+    public function getSocialTags()
     {
-        return $this->data->img;
+        return $this->rewriterSeo->{$this->rewriter->getSocialTagsMethod()}();
+    }
+
+    public function getImageTags()
+    {
+        if ($this->data->seoImg)
+        {
+            \rex_extension::register('YREWRITE_IMAGE', function ($params)
+            {
+                return \rex_media::get($this->data->seoImg);
+            });
+        }
+        return $this->rewriterSeo->{$this->rewriter->getImageTagsMethod()}();
     }
 
     protected function isUrl()

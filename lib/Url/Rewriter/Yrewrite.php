@@ -96,6 +96,22 @@ class Yrewrite extends Rewriter
         return 'getRobotsTag';
     }
 
+    /**
+     * @return string
+     */
+    public function getSocialTagsMethod()
+    {
+        return 'getSocialsTags';
+    }
+
+    /**
+     * @return string
+     */
+    public function getImageTagsMethod()
+    {
+        return 'getImageTags';
+    }
+
 
 
     /**

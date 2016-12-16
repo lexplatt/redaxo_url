@@ -62,6 +62,16 @@ abstract class Rewriter
      */
     abstract function getSeoRobotsTagMethod();
 
+    /**
+     * @return string
+     */
+    abstract function getSocialTagsMethod();
+
+    /**
+     * @return string
+     */
+    abstract function getImageTagsMethod();
+
 
     /**
      * @return string
