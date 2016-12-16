@@ -119,6 +119,11 @@ class Seo
     {
         if ($this->data->seoImg)
         {
+            if (strpos($this->data->seoImg, ','))
+            {
+                $images = explode(',', $this->data->seoImg);
+                $this->data->seoImg = array_shift($images);
+            }
             \rex_extension::register('YREWRITE_IMAGE', function ($params)
             {
                 return \rex_media::get($this->data->seoImg);
@@ -139,7 +144,7 @@ class Seo
 
     protected function normalizeMeta($string)
     {
-        return html_entity_decode(strip_tags($this->normalize($string)));
+        return strtr(html_entity_decode(strip_tags($this->normalize($string))), ['"' => "'"]);
     }
 
     public static function getSitemap()
