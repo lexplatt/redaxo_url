@@ -175,11 +175,11 @@ class Generator
 
                         switch ($table->restrictionOperator) {
                             case 'FIND_IN_SET':
-                                $queryWhere .= ' AND '. $table->restrictionOperator . ' (' . $table->restrictionValue . ', ' . $table->name . '.' . $table->restrictionField . ')';
+                                $queryWhere .= ' AND ' . $table->restrictionOperator . ' (' . $table->restrictionValue . ', ' . $table->name . '.' . $table->restrictionField . ')';
                                 break;
 
                             default:
-                                $queryWhere .= ' AND '. $table->name . '.' . $table->restrictionField . ' ' . $table->restrictionOperator . ' ' . $table->restrictionValue;
+                                $queryWhere .= ' AND ' . $table->name . '.' . $table->restrictionField . ' ' . $table->restrictionOperator . ' ' . $table->restrictionValue;
                                 break;
                         }
                     }
@@ -370,7 +370,7 @@ class Generator
 
                             $urlParamKey = (trim($table->urlParamKey) == '') ? self::$pathsNoUrlParamKey : $table->urlParamKey;
 
-                            self::$paths[$url->getDomain()][$articleId][$urlParamKey][$entry['id']][$articleClangId] = $object;
+                            self::$paths[$url->getDomain()][$articleId][$urlParamKey][$entry['id']][$articleClangId] = json_decode(json_encode($object), true);
 
                             $savePaths[$path] = '';
                         }
