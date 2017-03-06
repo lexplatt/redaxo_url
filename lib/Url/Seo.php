@@ -93,7 +93,7 @@ class Seo
                         $url = Generator::getUrlById($this->dataId, $this->data->articleId, $clang->getId(), TRUE, $this->data->urlParamKey);
 
                         // filter non existing urls - TODO: review
-                        if (!preg_match('!.*//$!', $url))
+                        if (strlen($url) && !preg_match('!.*//$!', $url))
                         {
                             $subject[$clang->getCode()] = $url;
                         }
