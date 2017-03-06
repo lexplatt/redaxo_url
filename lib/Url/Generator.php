@@ -72,9 +72,9 @@ class Generator
 
         if (!$relationTable) {
             $table->relationField = $parameters[$databaseAndTable . '_relation_field'];
-            $table->restrictionField = $parameters[$databaseAndTable . '_restriction_field'];
-            $table->restrictionOperator = $parameters[$databaseAndTable . '_restriction_operator'];
-            $table->restrictionValue = $parameters[$databaseAndTable . '_restriction_value'];
+            $table->restrictionField = [$parameters[$databaseAndTable . '_restriction_field_1'], $parameters[$databaseAndTable . '_restriction_field_2']];
+            $table->restrictionOperator = [$parameters[$databaseAndTable . '_restriction_operator_1'], $parameters[$databaseAndTable . '_restriction_operator_2']];
+            $table->restrictionValue = [$parameters[$databaseAndTable . '_restriction_value_1'], $parameters[$databaseAndTable . '_restriction_value_2']];
             $table->pathNames = $parameters[$databaseAndTable . '_path_names'];
             $table->pathCategories = $parameters[$databaseAndTable . '_path_categories'];
             $table->seoTitle = $parameters[$databaseAndTable . '_seo_title'];
@@ -144,43 +144,48 @@ class Generator
                     $table = self::getTableObject($result['table'], $result['table_parameters']);
 
                     $queryWhere = "WHERE ". $table->name . '.' . $table->field_1 ." IS NOT NULL AND ". $table->name . '.' . $table->field_1 ." != ''";
-                    if ($table->restrictionField != '' && $table->restrictionValue != '' && in_array($table->restrictionOperator, self::getRestrictionOperators())) {
-                        switch ($table->restrictionOperator) {
-                            case 'FIND_IN_SET':
-                                break;
-                            case 'IN (...)':
-                            case 'NOT IN (...)':
-                                $table->restrictionOperator = str_replace(' (...)', '', $table->restrictionOperator);
-                                $values = explode(',', $table->restrictionValue);
-                                foreach ($values as $key => $value) {
-                                    if (!(int) $value > 0) {
-                                        unset($values[$key]);
+                    foreach ($table->restrictionField as $rf_index => $rField) {
+                        $rf_operator = $table->restrictionOperator[$rf_index];
+                        $rf_value = $table->restrictionValue[$rf_index];
+
+                        if ($rField != '' && $rf_value != '' && in_array($rf_operator, self::getRestrictionOperators())) {
+                            switch ($rf_operator) {
+                                case 'FIND_IN_SET':
+                                    break;
+                                case 'IN (...)':
+                                case 'NOT IN (...)':
+                                $rf_operator = str_replace(' (...)', '', $rf_operator);
+                                    $values = explode(',', $rf_value);
+                                    foreach ($values as $key => $value) {
+                                        if (!(int) $value > 0) {
+                                            unset($values[$key]);
+                                        }
                                     }
-                                }
-                                $table->restrictionValue = ' (' . implode(',', $values) . ') ';
-                                break;
+                                    $rf_value = ' (' . implode(',', $values) . ') ';
+                                    break;
 
-                            case 'BETWEEN':
-                            case 'NOT BETWEEN':
-                                $values = explode(',', $table->restrictionValue);
-                                if (count($values) == 2) {
-                                    $table->restrictionValue = $values[0] . ' AND ' . $values[1];
-                                }
-                                break;
+                                case 'BETWEEN':
+                                case 'NOT BETWEEN':
+                                    $values = explode(',', $rf_value);
+                                    if (count($values) == 2) {
+                                        $rf_value = $values[0] . ' AND ' . $values[1];
+                                    }
+                                    break;
 
-                            default:
-                                $table->restrictionValue = \rex_sql::factory()->escape($table->restrictionValue);
-                                break;
-                        }
+                                default:
+                                    $rf_value = \rex_sql::factory()->escape($rf_value);
+                                    break;
+                            }
 
-                        switch ($table->restrictionOperator) {
-                            case 'FIND_IN_SET':
-                                $queryWhere .= ' AND ' . $table->restrictionOperator . ' (' . $table->restrictionValue . ', ' . $table->name . '.' . $table->restrictionField . ')';
-                                break;
+                            switch ($rf_operator) {
+                                case 'FIND_IN_SET':
+                                    $queryWhere .= ' AND ' . $rf_operator . ' (' . $rf_value . ', ' . $table->name . '.' . $rField . ')';
+                                    break;
 
-                            default:
-                                $queryWhere .= ' AND ' . $table->name . '.' . $table->restrictionField . ' ' . $table->restrictionOperator . ' ' . $table->restrictionValue;
-                                break;
+                                default:
+                                    $queryWhere .= ' AND ' . $table->name . '.' . $rField . ' ' . $rf_operator . ' ' . $rf_value;
+                                    break;
+                            }
                         }
                     }
 
