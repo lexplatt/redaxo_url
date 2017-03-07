@@ -139,12 +139,12 @@ class Seo
 
     protected function normalize($string)
     {
-        return str_replace(["\n", "\r"], [' ', ''], $string);
+        return str_replace(["\n", "\r", "<br>", "<br/>", "<br />"], [' ', '', '; ', '; ', '; '], $string);
     }
 
     protected function normalizeMeta($string)
     {
-        return strtr(html_entity_decode(strip_tags($this->normalize($string))), ['"' => "'"]);
+        return html_entity_decode(strtr(strip_tags($this->normalize($string)), ['"' => "'", '&nbsp;' => ' ']));
     }
 
     public static function getSitemap()
