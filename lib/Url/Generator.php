@@ -423,6 +423,9 @@ class Generator
                     foreach ($urlParamKeys as $urlParamKey => $ids) {
                         foreach ($ids as $id => $clangIds) {
                             foreach ($clangIds as $clangId => $object) {
+                                if (!\rex_clang::get($clangId)->isOnline()) {
+                                    continue;
+                                }
                                 $all[] = (object) $object;
                             }
                         }
