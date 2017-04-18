@@ -84,7 +84,7 @@ class Seo
             {
                 $subject = [];
 
-                foreach (\rex_clang::getAll() as $clang)
+                foreach (\rex_clang::getAll(true) as $clang)
                 {
                     $article = \rex_article::get($this->data->articleId, $clang->getId());
 
@@ -112,6 +112,12 @@ class Seo
 
     public function getSocialTags()
     {
+        \rex_extension::register('YREWRITE_FULL_URL', function ()
+        {
+            $url = Generator::getUrlById($this->dataId, $this->data->articleId, null, TRUE, $this->data->urlParamKey);
+            if($url)
+                return $url;
+        });
         return $this->rewriterSeo->{$this->rewriter->getSocialTagsMethod()}();
     }
 
