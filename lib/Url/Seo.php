@@ -213,7 +213,7 @@ class Seo
                                     $img_url  = $Rewriter->getFullPath(ltrim(\rex_url::media($media_name), '/'));
                                     $images[] = \rex_extension::registerPoint(new \rex_extension_point('URL_SITEMAP_IMAGE',
                                         "\n<image:loc>" . $img_url . '</image:loc>'.
-                                        "\n<image:title>" . $media->getValue('title') . '</image:title>', ['media' => $media, 'img_url' => $img_url, 'lang_id' => $item->clangId]));
+                                        "\n<image:title>" . strtr($media->getValue('title'), ['&' => '&amp;']) . '</image:title>', ['media' => $media, 'img_url' => $img_url, 'lang_id' => $item->clangId]));
                                 }
                             }
                         }
