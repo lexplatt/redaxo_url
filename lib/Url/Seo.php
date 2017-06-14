@@ -163,11 +163,14 @@ class Seo
             {
                 if ($item->sitemap)
                 {
+                    $images = [];
                     $lastmod = date(DATE_W3C, time());
+
                     if ($item->sitemapLastmod != '')
                     {
-                        $id  = Generator::getId($item->fullUrl);
+                        $media_cols = [];
                         $sql = \rex_sql::factory();
+                        $id  = Generator::getId($item->fullUrl);
                         $sql->setQuery('SELECT ' . $item->sitemapLastmod . ' AS lastmod FROM ' . $item->table['name'] . ' WHERE ' . $item->table['id'] . ' = :id LIMIT 2', ['id' => $id]);
                         if ($sql->getRows() == 1)
                         {
@@ -180,14 +183,59 @@ class Seo
                             }
                             $lastmod = date(DATE_W3C, $timestamp);
                         }
+
+                        if (\rex_plugin::get('yform', 'manager')->isAvailable()) {
+                            $ytable = \rex_yform_manager_table::get($item->table['name']);
+                            $fields = $ytable->getValueFields();
+
+                            foreach ($fields as $field) {
+                                if ($field->getTypeName() == 'be_media') {
+                                    $media_cols[] = $field->getName();
+                                }
+                            }
+                        }
+
+                        if (count($media_cols)) {
+                            $query = '
+                                SELECT 
+                                    CONCAT_WS(",", '. implode(',', $media_cols) .') AS medialist 
+                                 FROM ' . $item->table['name'] .' 
+                                 WHERE '. $item->table['id'] .' = :id';
+                            $sql->setQuery($query, ['id' => $id]);
+                            $value = $sql->getValue('medialist');
+
+                            if (strlen ($value)) {
+                                $medias = array_unique(explode(',', $value));
+
+                                foreach ($medias as $media_name) {
+                                    $Rewriter = Url::getRewriter();
+                                    $media    = \rex_media::get($media_name);
+                                    $img_url  = $Rewriter->getFullPath(ltrim(\rex_url::media($media_name), '/'));
+                                    $images[] = \rex_extension::registerPoint(new \rex_extension_point('URL_SITEMAP_IMAGE',
+                                        "\n<image:loc>" . $img_url . '</image:loc>'.
+                                        "\n<image:title>" . $media->getValue('title') . '</image:title>', ['media' => $media, 'img_url' => $img_url, 'lang_id' => $item->clangId]));
+                                }
+                            }
+                        }
                     }
-                    $sitemap[] =
+
+
+                    $_url =
                         "\n" . '<url>' .
                         "\n" . '<loc>' . $item->fullUrl . '</loc>' .
                         "\n" . '<lastmod>' . $lastmod . '</lastmod>' .
                         "\n" . '<changefreq>' . $item->sitemapFrequency . '</changefreq>' .
-                        "\n" . '<priority>' . $item->sitemapPriority . '</priority>' .
-                        "\n" . '</url>';
+                        "\n" . '<priority>' . $item->sitemapPriority . '</priority>';
+
+                    if (count($images)) {
+                        if (count($images)) {
+                            $_url .= "\n<image:image>". implode("</image:image>\n<image:image>", $images) .'</image:image>';
+                        }
+                    }
+
+                    $_url .= "\n" . '</url>';
+                    $sitemap[] = $_url;
+
                     if (count($item->fullPathNames))
                     {
                         foreach ($item->fullPathNames as $path)
