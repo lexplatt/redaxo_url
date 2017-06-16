@@ -210,10 +210,13 @@ class Seo
                                 foreach ($medias as $media_name) {
                                     $Rewriter = Url::getRewriter();
                                     $media    = \rex_media::get($media_name);
-                                    $img_url  = $Rewriter->getFullPath(ltrim(\rex_url::media($media_name), '/'));
-                                    $images[] = \rex_extension::registerPoint(new \rex_extension_point('URL_SITEMAP_IMAGE',
-                                        "\n<image:loc>" . $img_url . '</image:loc>'.
-                                        "\n<image:title>" . strtr($media->getValue('title'), ['&' => '&amp;']) . '</image:title>', ['media' => $media, 'img_url' => $img_url, 'lang_id' => $item->clangId]));
+
+                                    if ($media && in_array($media->getExtension(), ['png', 'jpg', 'jpeg', 'gif'])) {
+                                        $img_url  = $Rewriter->getFullPath(ltrim(\rex_url::media($media_name), '/'));
+                                        $images[] = \rex_extension::registerPoint(new \rex_extension_point('URL_SITEMAP_IMAGE',
+                                            "\n<image:loc>" . $img_url . '</image:loc>'.
+                                            "\n<image:title>" . strtr($media->getValue('title'), ['&' => '&amp;']) . '</image:title>', ['media' => $media, 'img_url' => $img_url, 'lang_id' => $item->clangId]));
+                                    }
                                 }
                             }
                         }
