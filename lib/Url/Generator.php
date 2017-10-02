@@ -92,19 +92,19 @@ class Generator
     public static function appendRewriterSuffix($url)
     {
         $rewriterSuffix = Url::getRewriter()->getSuffix();
-        if ($rewriterSuffix !== null) {
-            $url .= $rewriterSuffix;
+        if ($rewriterSuffix === null || $rewriterSuffix === '') {
+            return $url;
         }
-        return $url;
+        return $url . $rewriterSuffix;
     }
 
     public static function stripRewriterSuffix($url)
     {
         $rewriterSuffix = Url::getRewriter()->getSuffix();
-        if ($rewriterSuffix !== null) {
-            return substr($url, 0, (strlen($rewriterSuffix) * -1));
+        if ($rewriterSuffix === null || $rewriterSuffix === '') {
+            return $url;
         }
-        return $url;
+        return substr($url, 0, (strlen($rewriterSuffix) * -1));
     }
 
     public static function buildUrl($url, $fields = [])
@@ -122,6 +122,8 @@ class Generator
 
     public static function generatePathFile($params)
     {
+        $query_big = 'SET SQL_BIG_SELECTS = 1';
+        \rex_sql::factory()->setQuery($query_big);
         $query = '  SELECT      `id`,
                                 `article_id`,
                                 `clang_id`,
