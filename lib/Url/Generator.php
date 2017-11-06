@@ -99,7 +99,7 @@ class Generator
             $table->pathCategories = $parameters[$databaseAndTable . '_path_categories'];
             $table->seoTitle = $parameters[$databaseAndTable . '_seo_title'];
             $table->seoDescription = $parameters[$databaseAndTable . '_seo_description'];
-            $table->seoImg = $parameters[$databaseAndTable . '_seo_img'];
+            $table->seoImage = $parameters[$databaseAndTable . '_seo_image'];
             $table->sitemapAdd = $parameters[$databaseAndTable . '_sitemap_add'];
             $table->sitemapFrequency = $parameters[$databaseAndTable . '_sitemap_frequency'];
             $table->sitemapPriority = $parameters[$databaseAndTable . '_sitemap_priority'];
@@ -112,16 +112,19 @@ class Generator
     public static function appendRewriterSuffix($url)
     {
         $rewriterSuffix = Url::getRewriter()->getSuffix();
-        if ($rewriterSuffix !== null) {
-            $url .= $rewriterSuffix;
+        if ($rewriterSuffix === null || $rewriterSuffix === '') {
+            return $url;
         }
-        return $url;
+        return $url . $rewriterSuffix;
     }
 
     public static function stripRewriterSuffix($url)
     {
         $rewriterSuffix = Url::getRewriter()->getSuffix();
-        if ($rewriterSuffix !== null) {
+        if ($rewriterSuffix === null || $rewriterSuffix === '') {
+            return $url;
+        }
+        if (substr($url, (strlen($rewriterSuffix) * -1)) == $rewriterSuffix) {
             return substr($url, 0, (strlen($rewriterSuffix) * -1));
         }
         return $url;
@@ -142,6 +145,8 @@ class Generator
 
     public static function generatePathFile($params)
     {
+        $query_big = 'SET SQL_BIG_SELECTS = 1';
+        \rex_sql::factory()->setQuery($query_big);
         $query = '  SELECT      `id`,
                                 `article_id`,
                                 `clang_id`,
@@ -229,8 +234,8 @@ class Generator
                     if (isset($table->seoDescription) && $table->seoDescription != '') {
                         $querySelect[] = $table->name . '.' . $table->seoDescription . ' AS seo_description';
                     }
-                    if (isset($table->seoImg) && $table->seoImg != '') {
-                        $querySelect[] = $table->name . '.' . $table->seoImg . ' AS seo_img';
+                    if (isset($table->seoImage) && $table->seoImage != '') {
+                        $querySelect[] = $table->name . '.' . $table->seoImage . ' AS seo_image';
                     }
 
                     $queryFrom = '';
@@ -387,10 +392,10 @@ class Generator
                                 $object->seoDescription = '';
                             }
 
-                            if (isset($entry['seo_img'])) {
-                                $object->seoImg = $entry['seo_img'];
+                            if (isset($entry['seo_image'])) {
+                                $object->seoImage = $entry['seo_image'];
                             } else {
-                                $object->seoImg = '';
+                                $object->seoImage = '';
                             }
 
                             $urlParamKey = (trim($table->urlParamKey) == '') ? self::$pathsNoUrlParamKey : $table->urlParamKey;
@@ -612,7 +617,7 @@ class Generator
         return self::getUrlById($primaryId, $articleId, $clangId, true);
     }
 
-    public static function getArticleIdByUrlParamKey($paramKey)
+    public static function getArticleIdByUrlParamKey($paramKey, $paramValue)
     {
         self::ensurePaths();
         $currentUrl = Url::current();
@@ -621,7 +626,7 @@ class Generator
             if ($currentUrl->getDomain() == $domain) {
                 foreach ($articleIds as $articleId => $urlParamKeys) {
                     foreach ($urlParamKeys as $urlParamKey => $ids) {
-                        if ($urlParamKey == $paramKey) {
+                        if ($urlParamKey == $paramKey && isset($ids[$paramValue])) {
                             return $articleId;
                         }
                     }
@@ -653,7 +658,7 @@ class Generator
         } elseif (count($params['params']) > 0) {
             foreach ($params['params'] as $key => $value) {
                 if ((int) $value > 0) {
-                    $articleIdFound = self::getArticleIdByUrlParamKey($key);
+                    $articleIdFound = self::getArticleIdByUrlParamKey($key, (int)$value);
                     if ($articleIdFound) {
                         $articleId = $articleIdFound;
                         $primaryId = (int) $value;

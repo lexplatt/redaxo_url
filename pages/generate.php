@@ -87,7 +87,7 @@ if (!function_exists('url_generate_column_data')) {
                                                 '/', Generator::$pathSlashPlaceholder,
                                                 $pathNameForUrl))
                                         );
-                    $url_paths .= Generator::appendRewriterSuffix($url . $pathSegment) . '<br />';
+                    $url_paths .= Generator::buildUrl($url, [$pathSegment]) . '<br />';
                 }
             }
         }
@@ -98,7 +98,7 @@ if (!function_exists('url_generate_column_data')) {
                 if (count($categories)) {
                     $url_paths .= '<b><small>' . rex_i18n::msg('url_generate_path_categories') . '</small></b><br />';
                     foreach ($categories as $category) {
-                        $url_paths .= Generator::appendRewriterSuffix($url . Url::getRewriter()->normalize(trim($category->getName()))) . '<br />';
+                        $url_paths .= Generator::buildUrl($url, [trim($category->getName())]) . '<br />';
                     }
                 }
             }
@@ -272,15 +272,16 @@ if ($func == '') {
     $tables = [];
     foreach ($dbconfigs as $DBID => $dbconfig) {
         if ($dbconfig['host'] . $dbconfig['login'] . $dbconfig['password'] . $dbconfig['name'] != '') {
-            $connection = rex_sql::checkDbConnection(
-                $dbconfig['host'],
-                $dbconfig['login'],
-                $dbconfig['password'],
-                $dbconfig['name']
-            );
-            if ($connection === true) {
-                $tables[$DBID] = rex_sql::showTables($DBID);
-            }
+            //$connection = rex_sql::checkDbConnection(
+            //    $dbconfig['host'],
+            //    $dbconfig['login'],
+            //    $dbconfig['password'],
+            //    $dbconfig['name']
+            //);
+            //if ($connection === true) {
+            //    $tables[$DBID] = rex_sql::showTables($DBID);
+            //}
+            $tables[$DBID] = rex_sql::showTables($DBID);
         }
     }
 
@@ -474,14 +475,14 @@ if ($func == '') {
             $select->addOptions($options, true);
 
             $type = 'select';
-            $name = $table . '_seo_img';
+            $name = $table . '_seo_image';
             $f = $fieldContainer->addGroupedField($group, $type, $name);
             $f->setHeader('<div class="url-grid-item">');
             $f->setFooter('</div></div>');
             $f->setPrefix('<div class="rex-select-style">');
             $f->setSuffix('</div>');
             $f->setAttribute('disabled', 'true');
-            $f->setNotice($this->i18n('url_generate_notice_seo_img'));
+            $f->setNotice($this->i18n('url_generate_notice_seo_image'));
             $select = $f->getSelect();
             $select->addOption($this->i18n('url_generate_no_selection'), '');
             $select->addOptions($options, true);
