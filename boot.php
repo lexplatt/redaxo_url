@@ -67,3 +67,7 @@ rex_extension::register('PACKAGES_INCLUDED', function ($params) {
 
 }, rex_extension::EARLY);
 
+if (!rex::isBackend()) {
+    rex_extension::register('OUTPUT_FILTER', ['\Url\Generator', 'replaceLinks']);
+}
+

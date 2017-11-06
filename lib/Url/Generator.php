@@ -51,6 +51,26 @@ class Generator
     {
         return explode(self::$databaseTableSeparator, $value);
     }
+    
+    public static function replaceLinks($Ep) {
+
+        return preg_replace_callback(
+            '@table://(\w+)-(\d+)(?:-(\d+))?/?@i',
+            function ($matches) {
+                // tablename, row_id, clang_id
+                $sql = \rex_sql::factory();
+                $tkey = '1'. self::$databaseTableSeparator . $matches[1];
+                $query = '  SELECT     
+                                    `table_parameters`
+                        FROM        ' . \rex::getTable('url_generate') .' WHERE `table` = "'. $tkey .'" AND clang_id = '. $matches[3];
+                $sql->setQuery($query);
+
+                $values = json_decode($sql->getValue('table_parameters'), true);
+                return rex_getUrl(null, null, [$values[$tkey . '_url_param_key'] => $matches[2]]);
+            },
+            $Ep->getSubject()
+        );
+    }
 
     protected static function getTableObject($databaseAndTable, $parameters, $relationTable = false)
     {
