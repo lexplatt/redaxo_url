@@ -39,7 +39,7 @@ class Seo
 
     public function getTitleTag()
     {
-        if ($this->data->seoTitle)
+        if (isset($this->data->seoTitle))
         {
             \rex_extension::register('YREWRITE_TITLE', function ($params)
             {
@@ -53,7 +53,7 @@ class Seo
 
     public function getDescriptionTag()
     {
-        if ($this->data->seoDescription)
+        if (isset($this->data->seoDescription))
         {
             \rex_extension::register('YREWRITE_DESCRIPTION', function ($params)
             {
@@ -65,7 +65,7 @@ class Seo
 
     public function getCanonicalUrlTag()
     {
-        if ($this->data->fullUrl)
+        if (isset($this->data->fullUrl))
         {
             \rex_extension::register('YREWRITE_CANONICAL_URL', function ($params)
             {
@@ -113,7 +113,9 @@ class Seo
     {
         \rex_extension::register('YREWRITE_FULL_URL', function ()
         {
-            $url = Generator::getUrlById($this->dataId, $this->data->articleId, null, TRUE, $this->data->urlParamKey);
+            $artId = isset($this->data->articleId) ? $this->data->articleId : null;
+            $urlPKey = isset($this->data->urlParamKey) ? $this->data->urlParamKey : null;
+            $url = Generator::getUrlById($this->dataId, $artId, null, TRUE, $urlPKey);
             if($url)
                 return $url;
         });
