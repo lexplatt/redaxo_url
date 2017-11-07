@@ -77,7 +77,6 @@ class Seo
 
     public function getHreflangTags()
     {
-
         if ($this->isUrl())
         {
             \rex_extension::register('YREWRITE_HREFLANG_TAGS', function ($params)
