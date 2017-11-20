@@ -124,13 +124,12 @@ class Seo
 
     public function getImageTags()
     {
-        if ($this->data->seoImg)
+        $seoImage = strlen($this->data->seoImg) ? $this->data->seoImg : $this->data->seoImage;
+
+        if (strlen($seoImage))
         {
-            if (strpos($this->data->seoImg, ','))
-            {
-                $images = explode(',', $this->data->seoImg);
-                $this->data->seoImg = array_shift($images);
-            }
+            $this->data->seoImg = array_shift(explode(',', $seoImage));
+
             \rex_extension::register('YREWRITE_IMAGE', function ($params)
             {
                 return \rex_media::get($this->data->seoImg);
