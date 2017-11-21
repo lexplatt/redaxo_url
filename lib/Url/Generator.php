@@ -581,14 +581,7 @@ class Generator
             foreach ($articleIds as $article_Id => $urlParamKeys) {
                 foreach ($urlParamKeys as $url_ParamKey => $ids) {
                     if ($article_Id == $articleId && $url_ParamKey == $urlParamKey && isset($ids[$primaryId][$clangId])) {
-                        if ($currentUrl->getDomain() == $domain) {
-                            if ($returnFullUrl) {
-                                return $articleIds[$articleId][$urlParamKey][$primaryId][$clangId]['fullUrl'];
-                            }
-                            return $articleIds[$articleId][$urlParamKey][$primaryId][$clangId]['url'];
-                        } else {
-                            return $currentUrl->setHost($domain)->getSchemeAndHttpHost() . $articleIds[$articleId][$urlParamKey][$primaryId][$clangId]['url'];
-                        }
+                        return $currentUrl->setHost($domain)->getSchemeAndHttpHost() . $articleIds[$articleId][$urlParamKey][$primaryId][$clangId]['url'];
                     } else {
                         foreach ($urlParamKeys as $url_ParamKey => $ids) {
                             if ($url_ParamKey == $urlParamKey) {
@@ -597,11 +590,7 @@ class Generator
                                         foreach ($clangIds as $clang_Id => $object) {
                                             if ($clang_Id == $clangId) {
                                                 if (isset($object['pathCategories'][$articleId])) {
-                                                    if ($currentUrl->getDomain() == $domain) {
-                                                        return $object['pathCategories'][$articleId];
-                                                    } else {
-                                                        return $currentUrl->setHost($domain)->getSchemeAndHttpHost() . $object['pathCategories'][$articleId];
-                                                    }
+                                                    return $currentUrl->setHost($domain)->getSchemeAndHttpHost() . $object['pathCategories'][$articleId];
                                                 }
                                             }
                                         }
