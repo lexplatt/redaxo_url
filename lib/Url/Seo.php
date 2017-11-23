@@ -135,7 +135,8 @@ class Seo
 
         if (strlen($seoImage))
         {
-            $this->data->seoImg = array_shift(explode(',', $seoImage));
+            $images = explode(',', $seoImage);
+            $this->data->seoImg = array_shift($images);
 
             \rex_extension::register('YREWRITE_IMAGE', function ($params)
             {
