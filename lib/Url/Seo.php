@@ -124,7 +124,14 @@ class Seo
 
     public function getImageTags()
     {
-        $seoImage = strlen($this->data->seoImg) ? $this->data->seoImg : $this->data->seoImage;
+        $seoImage = '';
+
+        if (property_exists($this->data, 'seoImg') && strlen($this->data->seoImg)) {
+            $seoImage = $this->data->seoImg;
+        }
+        else if (property_exists($this->data, 'seoImage') && strlen($this->data->seoImage)) {
+            $seoImage = $this->data->seoImage;
+        }
 
         if (strlen($seoImage))
         {
