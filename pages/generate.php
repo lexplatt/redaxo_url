@@ -120,9 +120,9 @@ if (!function_exists('url_generate_column_data')) {
             $return .= '<dt>' . rex_i18n::msg('url_generate_url_param_key_short') . ': </dt><dd><code>rex_getUrl(' . $list->getValue('article_id') . ', ' . $list->getValue('clang_id') . ', [\'id\' => {n}])</code></dd>';
         }
 
-        $field = [$table_parameters[$table . '_restriction_field_1'], $table_parameters[$table . '_restriction_field_2']];
-        $operator = [$table_parameters[$table . '_restriction_operator_1'], $table_parameters[$table . '_restriction_operator_1']];
-        $value = [$table_parameters[$table . '_restriction_value_1'], $table_parameters[$table . '_restriction_value_2']];
+        $field = [$table_parameters[$table . '_restriction_field_1'], $table_parameters[$table . '_restriction_field_2'], $table_parameters[$table . '_restriction_field_3']];
+        $operator = [$table_parameters[$table . '_restriction_operator_1'], $table_parameters[$table . '_restriction_operator_2'], $table_parameters[$table . '_restriction_operator_3']];
+        $value = [$table_parameters[$table . '_restriction_value_1'], $table_parameters[$table . '_restriction_value_2'], $table_parameters[$table . '_restriction_value_3']];
         $rf_values = [];
         foreach ($field as $rf_index => $rf) {
             if ($rf != '') {
@@ -431,6 +431,38 @@ if ($func == '') {
 
             $type = 'text';
             $name = $table . '_restriction_value_2';
+            $value = '';
+            $f = $fieldContainer->addGroupedField($group, $type, $name);
+            $f->setHeader('<div class="url-grid-item url-grid-item-small">');
+            $f->setFooter('</div></div>');
+            $f->setAttribute('disabled', 'true');
+
+            $type = 'select';
+            $name = $table . '_restriction_field_3';
+            $f = $fieldContainer->addGroupedField($group, $type, $name);
+            $f->setHeader('<div class="url-grid"><div class="url-grid-item">');
+            $f->setFooter('</div>');
+            $f->setPrefix('<div class="rex-select-style">');
+            $f->setSuffix('</div>');
+            $f->setAttribute('disabled', 'true');
+            $f->setLabel('&nbsp;');
+            $select = $f->getSelect();
+            $select->addOption($this->i18n('url_generate_no_restriction'), '');
+            $select->addOptions($options, true);
+
+            $type = 'select';
+            $name = $table . '_restriction_operator_3';
+            $f = $fieldContainer->addGroupedField($group, $type, $name);
+            $f->setHeader('<div class="url-grid-item url-grid-item-small">');
+            $f->setFooter('</div>');
+            $f->setPrefix('<div class="rex-select-style">');
+            $f->setSuffix('</div>');
+            $f->setAttribute('disabled', 'true');
+            $select = $f->getSelect();
+            $select->addOptions(Generator::getRestrictionOperators());
+
+            $type = 'text';
+            $name = $table . '_restriction_value_3';
             $value = '';
             $f = $fieldContainer->addGroupedField($group, $type, $name);
             $f->setHeader('<div class="url-grid-item url-grid-item-small">');

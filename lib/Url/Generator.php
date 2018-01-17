@@ -92,9 +92,9 @@ class Generator
 
         if (!$relationTable) {
             $table->relationField = $parameters[$databaseAndTable . '_relation_field'];
-            $table->restrictionField = [$parameters[$databaseAndTable . '_restriction_field_1'], $parameters[$databaseAndTable . '_restriction_field_2']];
-            $table->restrictionOperator = [$parameters[$databaseAndTable . '_restriction_operator_1'], $parameters[$databaseAndTable . '_restriction_operator_2']];
-            $table->restrictionValue = [$parameters[$databaseAndTable . '_restriction_value_1'], $parameters[$databaseAndTable . '_restriction_value_2']];
+            $table->restrictionField = [$parameters[$databaseAndTable . '_restriction_field_1'], $parameters[$databaseAndTable . '_restriction_field_2'], $parameters[$databaseAndTable . '_restriction_field_3']];
+            $table->restrictionOperator = [$parameters[$databaseAndTable . '_restriction_operator_1'], $parameters[$databaseAndTable . '_restriction_operator_2'], $parameters[$databaseAndTable . '_restriction_operator_3']];
+            $table->restrictionValue = [$parameters[$databaseAndTable . '_restriction_value_1'], $parameters[$databaseAndTable . '_restriction_value_2'], $parameters[$databaseAndTable . '_restriction_value_3']];
             $table->pathNames = $parameters[$databaseAndTable . '_path_names'];
             $table->pathCategories = $parameters[$databaseAndTable . '_path_categories'];
             $table->seoTitle = $parameters[$databaseAndTable . '_seo_title'];
