@@ -44,7 +44,7 @@ class Seo
             \rex_extension::register('YREWRITE_TITLE', function ($params)
             {
                 $subject = $params->getSubject();
-                $subject = str_replace($params->getParam('title'), $this->normalizeMeta($this->data->seoTitle), $subject);
+                $subject = str_replace('%T', $this->normalizeMeta($this->data->seoTitle), $subject);
                 return $subject;
             });
         }
