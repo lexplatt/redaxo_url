@@ -186,7 +186,7 @@ class Seo
 
                         if (\rex_plugin::get('yform', 'manager')->isAvailable()) {
                             $ytable = \rex_yform_manager_table::get($item->table['name']);
-                            $fields = $ytable->getValueFields();
+                            $fields = $ytable && $ytable->getValueFields();
 
                             foreach ($fields as $field) {
                                 if ($field->getTypeName() == 'be_media') {
