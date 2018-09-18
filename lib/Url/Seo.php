@@ -41,6 +41,11 @@ class Seo
     {
         if (isset($this->data->seoTitle))
         {
+            $this->data->seoTitle = \rex_extension::registerPoint(new \rex_extension_point('URL_SEO_TITLE', $this->data->seoTitle, [
+                'data'   => $this->data,
+                'dataId' => $this->dataId
+            ]));
+
             \rex_extension::register('YREWRITE_TITLE', function ($params)
             {
                 $subject = $params->getSubject();
@@ -55,6 +60,11 @@ class Seo
     {
         if (isset($this->data->seoDescription))
         {
+            $this->data->seoDescription = \rex_extension::registerPoint(new \rex_extension_point('URL_SEO_DESCRIPTION', $this->data->seoDescription, [
+                'data'   => $this->data,
+                'dataId' => $this->dataId
+            ]));
+
             \rex_extension::register('YREWRITE_DESCRIPTION', function ($params)
             {
                 return $this->normalizeMeta($this->data->seoDescription);
