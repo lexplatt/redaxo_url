@@ -425,10 +425,10 @@ class Generator
                     foreach ($urlParamKeys as $urlParamKey => $ids) {
                         foreach ($ids as $id => $clangIds) {
                             foreach ($clangIds as $clangId => $object) {
-                                if ($currentUrl->getPath() == $object['url'] || in_array($currentUrl->getPath(), $object['pathNames'])) {
+                                if (urldecode($currentUrl->getPath()) == $object['url'] || in_array(urldecode($currentUrl->getPath()), $object['pathNames'])) {
                                     return ['article_id' => $articleId, 'clang' => $clangId];
                                 }
-                                if (false !== $categoryId = array_search($currentUrl->getPath(), $object['pathCategories'])) {
+                                if (false !== $categoryId = array_search(urldecode($currentUrl->getPath()), $object['pathCategories'])) {
                                     return ['article_id' => $categoryId, 'clang' => $clangId];
                                 }
                             }
@@ -479,7 +479,7 @@ class Generator
                     foreach ($urlParamKeys as $urlParamKey => $ids) {
                         foreach ($ids as $id => $clangIds) {
                             foreach ($clangIds as $clangId => $object) {
-                                if ($currentUrl->getPath() == $object['url'] || in_array($currentUrl->getPath(), $object['pathNames']) || in_array($currentUrl->getPath(), $object['pathCategories'])) {
+                                if (urldecode($currentUrl->getPath()) == $object['url'] || in_array(urldecode($currentUrl->getPath()), $object['pathNames']) || in_array(urldecode($currentUrl->getPath()), $object['pathCategories'])) {
                                     return $id;
                                 }
                             }
@@ -502,7 +502,7 @@ class Generator
                     foreach ($urlParamKeys as $urlParamKey => $ids) {
                         foreach ($ids as $id => $clangIds) {
                             foreach ($clangIds as $clangId => $object) {
-                                if ($currentUrl->getPath() == $object['url'] || in_array($currentUrl->getPath(), $object['pathNames']) || in_array($currentUrl->getPath(), $object['pathCategories'])) {
+                                if (urldecode($currentUrl->getPath()) == $object['url'] || in_array(urldecode($currentUrl->getPath()), $object['pathNames']) || in_array(urldecode($currentUrl->getPath()), $object['pathCategories'])) {
                                     return (object) $object;
                                 }
                             }
@@ -526,7 +526,7 @@ class Generator
                         foreach ($ids as $id => $clangIds) {
                             foreach ($clangIds as $clangId => $object) {
                                 foreach ($object['pathNames'] as $pathName) {
-                                    if ($currentUrl->getPath() == $pathName) {
+                                    if (urldecode($currentUrl->getPath()) == $pathName) {
                                         return self::stripRewriterSuffix(str_replace($object['url'], '', $pathName));
                                     }
                                 }
