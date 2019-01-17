@@ -60,13 +60,22 @@ class Generator
                 // tablename, row_id, clang_id
                 $sql = \rex_sql::factory();
                 $tkey = '1'. self::$databaseTableSeparator . $matches[1];
-                $query = '  SELECT     
-                                    `table_parameters`
-                        FROM        ' . \rex::getTable('url_generate') .' WHERE `table` = "'. $tkey .'" AND clang_id = '. $matches[3];
+                $query = '
+                        SELECT
+                            `article_id`,
+                            `clang_id`,
+                            `table_parameters`
+                        FROM ' . \rex::getTable('url_generate') .'
+                        WHERE `table` = "'. $tkey .'" 
+                        AND (
+                            clang_id = ' . $matches[3] . ' 
+                            OR clang_id = 0
+                        )
+                ';
                 $sql->setQuery($query);
 
                 $values = json_decode($sql->getValue('table_parameters'), true);
-                return rex_getUrl(null, null, [$values[$tkey . '_url_param_key'] => $matches[2]]);
+                return rex_getUrl($sql->getValue('article_id'), $sql->getValue('clang_id'), [$values[$tkey . '_url_param_key'] => $matches[2]]);
             },
             $Ep->getSubject()
         );
