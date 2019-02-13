@@ -28,12 +28,12 @@ rex_extension::register('PACKAGES_INCLUDED', function ($params) {
     // if anything changes -> refresh PathFile
     if (rex::isBackend()) {
         $extensionPoints = [
-            'CAT_ADDED', 'CAT_UPDATED', 'CAT_DELETED', 'CAT_STATUS',
-            'ART_ADDED', 'ART_UPDATED', 'ART_DELETED', 'ART_STATUS',
-            'CLANG_ADDED', 'CLANG_UPDATED', 'CLANG_DELETED',
-            'ARTICLE_GENERATED',
-            'ALL_GENERATED',
-            'REX_FORM_SAVED',
+//            'CAT_ADDED', 'CAT_UPDATED', 'CAT_DELETED', 'CAT_STATUS',
+//            'ART_ADDED', 'ART_UPDATED', 'ART_DELETED', 'ART_STATUS',
+//            'CLANG_ADDED', 'CLANG_UPDATED', 'CLANG_DELETED',
+//            'ARTICLE_GENERATED',
+//            'ALL_GENERATED',
+//            'REX_FORM_SAVED',
             'YFORM_DATA_ADDED', 'YFORM_DATA_UPDATED',
         ];
 
@@ -42,7 +42,30 @@ rex_extension::register('PACKAGES_INCLUDED', function ($params) {
                 $params = $ep->getParams();
                 $params['subject'] = $ep->getSubject();
                 $params['extension_point'] = $ep->getName();
-                Generator::generatePathFile($params);
+
+                // kreatif
+                $query = "
+                    SELECT 
+                        `id`,
+                        `article_id`,
+                        `clang_id`,
+                        `url`,
+                        `table`,
+                        `table_parameters`,
+                        `relation_table`,
+                        `relation_table_parameters`,
+                        `relation_insert`
+                    FROM
+                " . \rex::getTable('url_generate') . "
+                    WHERE `table` LIKE \"%{$ep->getParam('main_table')}\"
+                ";
+
+                $results = \rex_sql::factory()->setQuery($query)->getArray();
+
+                if ($results) {
+                    Generator::generatePathFile($params);
+                }
+                // end kreatif
             });
         }
     }
