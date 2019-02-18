@@ -163,7 +163,7 @@ if ($func == '') {
                             `table_parameters`, 
                             `relation_table`, 
                             `relation_table_parameters`
-                FROM        ' . rex::getTable('url_generate');
+                FROM        ' . rex::getTable('url_generate') . ' ORDER BY `table`, `clang_id`';
 
     $list = rex_list::factory($query);
     $list->addTableAttribute('class', 'table-striped');
