@@ -368,7 +368,7 @@ class UrlManager
                 $urlRecord = self::getForRewriteUrl($profile, (int) $urlParamValue, $clangId);
                 if (!$urlRecord) {
                     // Urls erstellen
-                    $profile->buildUrlsByDatasetId($urlParamValue, \rex_sql_table::get($profile->getTableName())->getPrimaryKey()[0]);
+                    $profile->buildUrlsByDatasetId($urlParamValue);
                     $urlRecord = self::getForRewriteUrl($profile, (int) $urlParamValue, $clangId);
                 }
 
@@ -390,7 +390,7 @@ class UrlManager
 
                         $expandedOriginUrl = $urlRecord->getUrl();
                         $expandedOriginUrl->handleRewriterSuffix();
-                        $expandedOriginUrl->appendPathSegments($restStructurePathUrl->getSegments());
+                        $expandedOriginUrl->appendPathSegments($restStructurePathUrl->getSegments(), $article->getClangId());
 
                         $urlRecord = self::resolveUrl($expandedOriginUrl);
                     }
@@ -421,6 +421,7 @@ class UrlManager
         return [
             '/' => '/',
             '-' => '-',
+            '_' => '_',
         ];
     }
 

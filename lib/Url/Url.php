@@ -12,6 +12,7 @@
 namespace Url;
 
 use Riimu\Kit\UrlParser\Uri;
+use Riimu\Kit\UrlParser\UriParser;
 use Url\Rewriter\Rewriter;
 
 class Url
@@ -31,7 +32,7 @@ class Url
     public function __construct($url)
     {
         // $this->uri = (new UriParser())->parse($url);
-        $this->uri = (new Uri($url));
+        $this->uri = (new Uri($url, UriParser::MODE_UTF8));
     }
 
     public function __call($method, $arguments)
@@ -57,15 +58,15 @@ class Url
         $this->removeRewriterSuffix();
     }
 
-    public function appendPathSegments(array $segments)
+    public function appendPathSegments(array $segments, $clangId = 1)
     {
-        $segments = $this->normalize($segments);
+        $segments = $this->normalize($segments, $clangId);
         return $this->modifyPathSegments($this->uri->getPathSegments(), $segments);
     }
 
-    public function prependPathSegments(array $segments)
+    public function prependPathSegments(array $segments, $clangId = 1)
     {
-        $segments = $this->normalize($segments);
+        $segments = $this->normalize($segments, $clangId);
         return $this->modifyPathSegments($segments, $this->uri->getPathSegments());
     }
 
@@ -260,14 +261,14 @@ class Url
         return $this;
     }
 
-    private function normalize($sick)
+    private function normalize($sick, $clangId = 1)
     {
         if (is_string($sick)) {
             $sick = [$sick];
         }
 
         foreach ($sick as $index => $value) {
-            $sick[$index] = self::$rewriter->normalize($value);
+            $sick[$index] = self::$rewriter->normalize($value, $clangId);
         }
         return $sick;
     }
