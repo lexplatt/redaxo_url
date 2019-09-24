@@ -533,7 +533,9 @@ class Profile
 
     protected function getDatasets()
     {
-        $query = $this->buildQuery();
+        $query = \rex_extension::registerPoint(new \rex_extension_point('URL_PROFILE_DATASET', $this->buildQuery(), [
+            'profile' => $this
+        ]));
         // $items = \rex_sql::factory()->setDebug()->getArray($query->getQuery(), $query->getParams());
         return $query->find();
     }
