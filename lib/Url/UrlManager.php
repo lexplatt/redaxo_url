@@ -233,7 +233,6 @@ class UrlManager
 
     /**
      * @param int $profileId
-     * @param int $articleId
      *
      * @throws \rex_sql_exception
      *
@@ -292,10 +291,24 @@ class UrlManager
      */
     public static function resolveUrl(Url $url)
     {
+        $rewriterSuffix = Url::getRewriter()->getSuffix();
+        $url_filename = $url->getFileName();
+
+        if (strpos($url_filename, '.') === false && $rewriterSuffix && substr($url->getPath(), -strlen($rewriterSuffix)) !== $rewriterSuffix) {
+            header('HTTP/1.1 301 Moved Permanently');
+            header('Location: '.$url->getPath().$rewriterSuffix.$url->getQuery());
+            exit;
+        }
+
         // Url nur auflösen (DB-Abfrage), wenn der erste Teil des Url-Pfades auch in einem Profil zu finden ist
         // Prüft ob der erste Teil der übergebenen Url in einem Profil zu finden ist.
         $resolve = false;
         foreach (Profile::getAll() as $profile) {
+            if ($profile->hasPreSaveCalled()) {
+                $resolve = true;
+                break;
+            }
+
             $articlePath = $profile->getArticleUrl()->getPath();
             if ($articlePath == substr($url->getPath(), 0, strlen($articlePath))) {
                 $resolve = true;
@@ -408,9 +421,13 @@ class UrlManager
                     $url->withQuery('?'.\rex_string::buildQuery($urlParams, $ep->getParam('separator')));
                 }
 
+                if ($url->getDomain() == Url::getCurrent()->getDomain()) {
+                    return $url->getPath().$url->getQuery();
+                }
+
                 $scheme = Url::getRewriter()->getSchemeByDomain($url->getDomain()) ?: (Url::getRewriter()->isHttps() ? 'https' : 'http');
                 $url->withScheme($scheme);
-                return $url->getSchemeAndHttpHost().$url->getPath().$url->getQuery();
+                return $url->getSchemeAndHttpHost().$url->getPath();
             }
         }
         return null;

@@ -16,7 +16,7 @@ use Url\Seo;
 use Url\Url;
 use Url\UrlManager;
 
-\Url\Generator::boot();
+Generator::boot();
 if (null !== Url::getRewriter()) {
     Url::getRewriter()->articleIdNotFound();
 }
@@ -31,7 +31,7 @@ rex_extension::register('PACKAGES_INCLUDED', function (\rex_extension_point $epP
             'CACHE_DELETED',
             'REX_FORM_SAVED',
             'REX_YFORM_SAVED',
-            'YFORM_DATA_ADDED', 'YFORM_DATA_UPDATED', 'YFORM_DATA_STATUS_CHANGED',
+            'YFORM_DATA_ADDED', 'YFORM_DATA_DELETED', 'YFORM_DATA_UPDATED', 'YFORM_DATA_STATUS_CHANGED',
         ];
 
         foreach ($extensionPoints as $extensionPoint) {
@@ -69,13 +69,24 @@ rex_extension::register('PACKAGES_INCLUDED', function (\rex_extension_point $epP
             });
         }
     }
+    else {
+        \rex_extension::register('YREWRITE_DOMAIN_SITEMAP_URLS', ['\Url\Seo', 'setSitemap']);
+    }
 
     rex_extension::register('URL_REWRITE', function (\rex_extension_point $ep) {
         return UrlManager::getRewriteUrl($ep);
     }, rex_extension::EARLY);
 
-
-    $Seo = new Seo();
-    $Seo->init();
-
+    // kreatif: not needed for Kreatif Seo
+//    if (null !== Url::getRewriter() && Url::getRewriter()->getSitemapExtensionPoint()) {
+//        rex_extension::register(Url::getRewriter()->getSitemapExtensionPoint(), function (rex_extension_point $ep) {
+//            $sitemap = $ep->getSubject();
+//            if (is_array($sitemap)) {
+//                $sitemap = array_merge($sitemap, Seo::getSitemap());
+//            } else {
+//                $sitemap = Seo::getSitemap();
+//            }
+//            $ep->setSubject($sitemap);
+//        }, rex_extension::EARLY);
+//    }
 }, rex_extension::EARLY);

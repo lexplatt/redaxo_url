@@ -211,9 +211,6 @@ class UrlManagerSql
      */
     public static function getByProfileId($profileId)
     {
-
-        $clangids = \rex_clang::getAllIds(true);
-
         $sql = self::factory();
         return $sql->sql->getArray('SELECT * FROM '.\rex::getTable(self::TABLE_NAME).' WHERE `profile_id` = ?', [$profileId]);
     }

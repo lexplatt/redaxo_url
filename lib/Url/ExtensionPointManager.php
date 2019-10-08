@@ -152,6 +152,7 @@ class ExtensionPointManager
                 break;
 
             case 'YFORM_DATA_ADDED':
+            case 'YFORM_DATA_DELETED':
             case 'YFORM_DATA_UPDATED':
             case 'YFORM_DATA_STATUS_CHANGED':
                 // dump($this->extensionPoint->getParams());
