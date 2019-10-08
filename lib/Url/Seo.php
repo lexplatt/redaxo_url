@@ -102,10 +102,11 @@ class Seo
 
     public static function setSitemap(\rex_extension_point $Ep)
     {
-        $urls     = (array)$Ep->getSubject();
-        $profiles = Profile::getAll();
+        $urls       = (array)$Ep->getSubject();
+        $free_slots = $Ep->getParam('free_slots', 50000);
+        $profiles   = Profile::getAll();
 
-        if (!$profiles) {
+        if (!$profiles || $free_slots <= 0) {
             return $urls;
         }
 
@@ -165,6 +166,11 @@ class Seo
                     }
                 }
                 $urls[] = $url;
+                $free_slots--;
+
+                if ($free_slots <= 0) {
+                    break 2;
+                }
             }
         }
         return $urls;
