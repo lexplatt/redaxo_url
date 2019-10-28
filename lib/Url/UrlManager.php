@@ -90,7 +90,7 @@ class UrlManager
 
     public function getDatasetId()
     {
-        return $this->values['data_id'];
+        return \rex_extension::registerPoint(new \rex_extension_point('URL_GET_DATASET_ID', $this->values['data_id'], ['object' => $this]));
     }
 
     /**
