@@ -292,9 +292,7 @@ class UrlManager
     public static function resolveUrl(Url $url)
     {
         $rewriterSuffix = Url::getRewriter()->getSuffix();
-        $url_filename = $url->getFileName();
-
-        if (strpos($url_filename, '.') === false && $rewriterSuffix && substr($url->getPath(), -strlen($rewriterSuffix)) !== $rewriterSuffix) {
+        if ($rewriterSuffix && substr($url->getPath(), -strlen($rewriterSuffix)) !== $rewriterSuffix) {
             header('HTTP/1.1 301 Moved Permanently');
             header('Location: '.$url->getPath().$rewriterSuffix.$url->getQuery());
             exit;
