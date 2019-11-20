@@ -291,8 +291,10 @@ class UrlManager
      */
     public static function resolveUrl(Url $url)
     {
+        // kreatif: ohne dieser Zeile funktioniert sitemap.xml nicht!!!
         $rewriterSuffix = Url::getRewriter()->getSuffix();
-        if ($rewriterSuffix && substr($url->getPath(), -strlen($rewriterSuffix)) !== $rewriterSuffix) {
+        $url_filename = $url->getFileName();
+        if (strpos($url_filename, '.') === false && $rewriterSuffix && substr($url->getPath(), -strlen($rewriterSuffix)) !== $rewriterSuffix) {
             header('HTTP/1.1 301 Moved Permanently');
             header('Location: '.$url->getPath().$rewriterSuffix.$url->getQuery());
             exit;
