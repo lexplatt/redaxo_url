@@ -138,11 +138,11 @@ class Seo
                     continue;
                 }
 
-                $url = $profileUrl->getUrl();
-                $url->withSolvedScheme();
+                $urlObject = $profileUrl->getUrl();
+                $urlObject->withSolvedScheme();
 
                 $url = [
-                    'loc'        => (string)$url->getSchemeAndHttpHost() . urldecode($url->getPath()),
+                    'loc'        => (string)$urlObject->getSchemeAndHttpHost() . urldecode($urlObject->getPath()),
                     'lastmod'    => $profileUrl->getLastmod(),
                     'changefreq' => $profile->getSitemapFrequency(),
                     'priority'   => $profile->getSitemapPriority(),
@@ -158,7 +158,7 @@ class Seo
 
                         if ($media && $media->isImage()) {
                             $imgUrl         = [
-                                'loc'   => $url->getSchemeAndHttpHost() . $media->getUrl(),
+                                'loc'   => $urlObject->getSchemeAndHttpHost() . $media->getUrl(),
                                 'title' => rex_escape(strip_tags($media->getTitle())),
                             ];
                             $url['image'][] = $imgUrl;
