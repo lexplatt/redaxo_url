@@ -111,7 +111,8 @@ class Profile
         }
 
         for ($index = 1; $index <= self::RESTRICTION_COUNT; ++$index) {
-            if ($this->getColumnName(self::RESTRICTION_PREFIX.$index) == '' || $this->table['restrictions'][$index]['value'] == '') {
+            // kreatif: removed this check -> $this->table['restrictions'][$index]['value'] == ''
+            if ($this->getColumnName(self::RESTRICTION_PREFIX.$index) == '') {
                 unset($this->table['restrictions'][$index]);
             }
         }
