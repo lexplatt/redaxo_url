@@ -124,6 +124,9 @@ class UriPattern
         $subject = (string) $subject;
 
         if ($this->allowNonAscii || preg_match('/^[\\x00-\\x7F]*$/', $subject)) {
+            // kreatif: ohne dieser Zeile funktionieren "[" und "]" nicht
+            $subject = strtr($subject, ['[' => '%5B', ']' => '%5D']);
+
             if (preg_match($pattern, $subject, $match)) {
                 $matches = $this->getNamedPatterns($match);
 
