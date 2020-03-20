@@ -94,3 +94,8 @@ rex_extension::register('PACKAGES_INCLUDED', function (\rex_extension_point $epP
 //        }, rex_extension::EARLY);
 //    }
 }, rex_extension::EARLY);
+
+rex_extension::register('PACKAGES_INCLUDED', function (\rex_extension_point $epPackagesIncluded) {
+    // kreatif: wird für SEO-Title gebraucht
+    new Seo();
+});
