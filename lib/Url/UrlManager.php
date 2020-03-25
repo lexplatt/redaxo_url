@@ -312,9 +312,15 @@ class UrlManager
 
         $rewriterSuffix = Url::getRewriter()->getSuffix();
         if (\rex::isFrontend() && $rewriterSuffix && substr($url->getPath(), -strlen($rewriterSuffix)) !== $rewriterSuffix) {
-            header('HTTP/1.1 301 Moved Permanently');
-            header('Location: '.$url->getPath().$rewriterSuffix.$url->getQuery());
-            exit;
+            $ext = pathinfo(basename($url->getPath()), PATHINFO_EXTENSION);
+
+            // kreatif: extension check added
+            if ($ext == '') {
+                $query = trim($url->getQuery()) == '' ? '' : '?' . $url->getQuery();
+                header('HTTP/1.1 301 Moved Permanently');
+                header('Location: '.$url->getPath().$rewriterSuffix.$query);
+                exit;
+            }
         }
 
         $items = UrlManagerSql::getByUrl($url);
