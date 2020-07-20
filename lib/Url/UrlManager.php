@@ -83,8 +83,6 @@ class UrlManager
             }
         }
 
-        $items = \rex_sql::factory()->getArray($query->getQuery(), $query->getParams());
-
         return $query->findOne();
     }
 
@@ -204,7 +202,7 @@ class UrlManager
      */
     public function inSitemap()
     {
-        return $this->values['sitemap'] == 1;
+        return $this->values['sitemap'] === 1 ? true : false;
     }
 
     /**
@@ -300,6 +298,11 @@ class UrlManager
                 break;
             }
 
+            if (null === $profile->getArticleClangId()) {
+                $resolve = true;
+                break;
+            }
+
             $articlePath = $profile->getArticleUrl()->getPath();
             if ($articlePath == substr($url->getPath(), 0, strlen($articlePath))) {
                 $resolve = true;
@@ -310,15 +313,13 @@ class UrlManager
             return null;
         }
 
+        // Weiterleitung auf URL mit Suffix, wenn Suffix fehlt
         $rewriterSuffix = Url::getRewriter()->getSuffix();
-        if (\rex::isFrontend() && $rewriterSuffix && substr($url->getPath(), -strlen($rewriterSuffix)) !== $rewriterSuffix) {
-            $ext = pathinfo(basename($url->getPath()), PATHINFO_EXTENSION);
-
-            // kreatif: extension check added
-            if ($ext == '') {
-                $query = trim($url->getQuery()) == '' ? '' : '?' . $url->getQuery();
+        if (\rex::isFrontend() && $rewriterSuffix && substr($url->getRequestPath(), -strlen($rewriterSuffix)) !== $rewriterSuffix) {
+            // URL Objekt nachfolgend neu erstellen um Parameter nicht zu verlieren
+            if(count(UrlManagerSql::getByUrl($url)) == 1) {
                 header('HTTP/1.1 301 Moved Permanently');
-                header('Location: '.$url->getPath().$rewriterSuffix.$query);
+                header('Location: '. $url->toString());
                 exit;
             }
         }
@@ -403,10 +404,8 @@ class UrlManager
                         $restStructurePath = str_replace($article->getUrl(), '', $category->getUrl());
 
                         $restStructurePathUrl = new Url($restStructurePath);
-                        $restStructurePathUrl->handleRewriterSuffix();
 
                         $expandedOriginUrl = $urlRecord->getUrl();
-                        $expandedOriginUrl->handleRewriterSuffix();
                         $expandedOriginUrl->appendPathSegments($restStructurePathUrl->getSegments(), $article->getClangId());
 
                         $urlRecord = self::resolveUrl($expandedOriginUrl);

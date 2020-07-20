@@ -216,14 +216,15 @@ class Seo
                 $url = $item->getUrl();
                 $url->withSolvedScheme();
                 $code = \rex_clang::get($item->getClangId())->getCode();
-                $tags['hreflang:'.$code] = '<link rel="alternate" hreflang="'.$code.'" href="'.$url.'" />';
+                $tags['hreflang:'.$code] = '<link rel="alternate" hreflang="'.$code.'" href="'.$url->toString().'" />';
             }
         }
 
         $tags['twitter:card'] = '<meta name="twitter:card" content="summary" />';
 
         if ($this->manager->getSeoImage()) {
-            $image = array_shift(explode(',', $this->manager->getSeoImage()));
+            $images = explode(',', $this->manager->getSeoImage());
+            $image = array_shift($images);
 
             $media = \rex_media::get($image);
             if ($media) {
@@ -284,6 +285,7 @@ class Seo
                 }
             }
 
+
             $profileUrls = $profile->getUrls();
             if (!$profileUrls) {
                 continue;
@@ -296,6 +298,13 @@ class Seo
                         continue;
                     }
                     $article = \rex_article::get($profile->getArticleId(), $profileUrl->getClangId());
+                    if (!$article->isOnline() || !$article->isPermitted()) {
+                        continue;
+                    }
+                }
+
+                if ($profileUrl->isStructure()) {
+                    $article = \rex_article::get($profileUrl->getArticleId(), $profileUrl->getClangId());
                     if (!$article->isOnline() || !$article->isPermitted()) {
                         continue;
                     }

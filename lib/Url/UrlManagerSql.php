@@ -162,6 +162,8 @@ class UrlManagerSql
             $this->sql->addGlobalUpdateFields();
             $this->sql->insert();
             $success = true;
+
+            self::triggerTableUpdated();
         } catch (\rex_sql_exception $e) {
             $success = false;
         }
@@ -175,6 +177,8 @@ class UrlManagerSql
     {
         $sql = self::factory();
         $sql->sql->setQuery('TRUNCATE TABLE '.\rex::getTable(self::TABLE_NAME));
+
+        self::triggerTableUpdated();
     }
 
     /**
@@ -187,6 +191,8 @@ class UrlManagerSql
         $sql = self::factory();
         $sql->sql->setWhere('profile_id = ?', [$profileId]);
         $sql->sql->delete();
+
+        self::triggerTableUpdated();
     }
 
     /**
@@ -200,6 +206,8 @@ class UrlManagerSql
         $sql = self::factory();
         $sql->sql->setWhere('profile_id = ? AND data_id = ?', [$profileId, $datasetId]);
         $sql->sql->delete();
+
+        self::triggerTableUpdated();
     }
 
     /**
@@ -280,11 +288,17 @@ class UrlManagerSql
      */
     public static function getByUrl(Url $url)
     {
-        $url->withScheme('');
-        $url->withQuery('');
-        $urlAsString = $url->__toString();
+        $this_url = clone $url;
+        $this_url->withScheme('');
+        $this_url->withQuery('');
+        $urlAsString = $this_url->toString();
 
         $sql = self::factory();
         return $sql->sql->getArray('SELECT * FROM '.\rex::getTable(self::TABLE_NAME).' WHERE `url` = ?', [$urlAsString]);
+    }
+
+    public static function triggerTableUpdated()
+    {
+        \rex_extension::registerPoint(new \rex_extension_point('URL_TABLE_UPDATED'));
     }
 }

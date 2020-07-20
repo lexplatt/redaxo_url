@@ -23,7 +23,7 @@ Der REDAXO Artikel `/the-big-lebowski/` selbst existiert dabei nicht. Es wird al
 **The Big Lebowski** ist dabei der Titel eines Filmes, welcher in einer eigenen Datenbanktabelle hinterlegt wurde. 
 
 
-## Url holen 
+### Url holen 
 Um die Url eines einzelnen Filmes auszugeben verwendet man:
 
 ```php
@@ -36,7 +36,7 @@ echo rex_getUrl('', '', ['movie-id' => $movieId]);
 | `$movieId`    | Datensatz Id des Filmes |
 
 
-## Id holen 
+### Id holen 
 Nach dem der Film mit der eigenen Url aufgerufen wurde (Darstellung der Detailseite), muss jetzt die dazugehörige Datensatz-Id ermittelt werden. Erst dann können die eigentlichen Daten aus der Tabelle abgerufen und ausgegeben werden.
 
 ```php
@@ -55,11 +55,15 @@ $manager = Url::resolveCurrent();
 
 if ($manager) {
     $movie = rex_yform_manager_table::get('rex_movie')->query()->findId($manager->getDatasetId());
+    // oder wenn ModelClass genutzt wird
+    $movie = Movie::get($manager->getDatasetId());
     if ($movie) {
         dump($movie);
     }
 } else {
     $movies = rex_yform_manager_table::get('rex_movie')->query()->find();
+    // oder wenn ModelClass genutzt wird
+    $movies = Movie::getAll();
     if (count($movies)) {
         foreach ($movies as $movie) {
             echo '<a href="' . rex_getUrl('', '', ['movie-id' => $movie->getId()]) . '">' . $movie->getValue('title') . '</a>';
@@ -68,13 +72,13 @@ if ($manager) {
 }
 ```
 
-## Zusätzliche Pfade aus Relationen bilden
+### Zusätzliche Pfade aus Relationen bilden
 
-Möchte man die Filme Genres zuordnen, passiert dies meist über eine Relation zu diesen Kategorien.
+Möchte man den Filmen Genres zuordnen, passiert dies meist über eine Relation zu diesen Kategorien.
 Die Urls dazu könnten dann so aussehen: `/filme/komoedie/the-big-lebowski/`
  
 
-## Zusätzliche Pfade für die Url
+### Zusätzliche Pfade für die Url
 
 #### eigene Pfade an die Url hängen
 
@@ -146,7 +150,6 @@ function rex_url_shortener(rex_extension_point $ep) {
 		$article_url_without_lang_slug_split_encoded = implode("/", $article_url_without_lang_slug_split);
 
 		$new_url = new \Url\Url(str_replace($$article_url_without_lang_slug_split_encoded, '/', $url->__toString()));
-		$new_url->handleRewriterSuffix();
 		
 		// Auf Duplikate prüfen
 		$query = "SELECT * FROM ". \rex::getTablePrefix() ."url_generator_url "
@@ -166,6 +169,17 @@ function rex_url_shortener(rex_extension_point $ep) {
 }
 ```
 
+## SEO-Methoden
+Für die ordnungsgemäße Ausgabe müssen die YRewrite-Tags für Titel, Beschreibung u.a. durch die SEO-Klasse des URL-Addons ausgetauscht werden.  `$seo = new rex_yrewrite_seo();` wird ersetzt durch `$urlSeo = new Url\Seo();`:
+
+```php
+$urlSeo = new Url\Seo();
+    echo $urlSeo->getTitleTag().PHP_EOL;
+    echo $urlSeo->getDescriptionTag().PHP_EOL;
+    echo $urlSeo->getRobotsTag().PHP_EOL;
+    echo $urlSeo->getHreflangTags().PHP_EOL;
+    echo $urlSeo->getCanonicalUrlTag().PHP_EOL;
+```
 
 ## Weitere Tipps 
 
