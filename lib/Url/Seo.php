@@ -71,7 +71,7 @@ class Seo
                     $clang = \rex_clang::get($item->getClangId());
                     $url   = $item->getUrl();
                     $url->withSolvedScheme();
-                    $href_langs[$clang->getCode()] = (string)$url;
+                    $href_langs[$clang->getCode()] = (string)$url->toString();
                 }
             }
         }
@@ -85,7 +85,7 @@ class Seo
         if ($this->isUrl()) {
             $url = $this->manager->getUrl();
             $url->withSolvedScheme();
-            $canonical = (string)$url;
+            $canonical = (string)$url->toString();
         }
         return $canonical;
     }
