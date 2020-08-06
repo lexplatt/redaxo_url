@@ -111,8 +111,7 @@ class Profile
         }
 
         for ($index = 1; $index <= self::RESTRICTION_COUNT; ++$index) {
-            // kreatif: removed this check -> $this->table['restrictions'][$index]['value'] == ''
-            if ($this->getColumnName(self::RESTRICTION_PREFIX.$index) == '') {
+            if ($this->getColumnName(self::RESTRICTION_PREFIX.$index) == '' || ($this->table['restrictions'][$index]['value'] == '' && !in_array($this->table['restrictions'][$index]['comparison_operator'], Database::getComparisonOperatorsForEmptyValue()))) {
                 unset($this->table['restrictions'][$index]);
             }
         }
@@ -204,6 +203,24 @@ class Profile
     }
 
     /**
+     * @return array
+     */
+    public function getUserPaths()
+    {
+        $array = [];
+        $lines = explode("\n", $this->append_user_paths);
+        foreach ($lines as $line) {
+            $parts = explode('=', $line);
+            if (!isset($parts[1])) {
+                $parts[1] = $parts[0];
+            }
+            $array[trim($parts[0])] = trim($parts[1]);
+
+        }
+        return $array;
+    }
+
+    /**
      * @return bool
      */
     public function inSitemap()
@@ -275,7 +292,6 @@ class Profile
         }
 
         $url = new Url(Url::getRewriter()->getFullUrl($articleId, $clangId));
-        $url->handleRewriterSuffix();
         $url->withScheme('');
 
         $dataPath = new Url('');
@@ -296,7 +312,7 @@ class Profile
                 $concatSegmentParts = '';
                 for ($index = 1; $index <= self::SEGMENT_PART_COUNT; ++$index) {
                     if ($dataset->hasValue($relation->getAlias().'_segment_part_'.$index)) {
-                        $concatSegmentParts .= $this->getSegmentPartSeparators()[$index] ?? '';
+                        $concatSegmentParts .= $relation->getSegmentPartSeparators()[$index] ?? '';
                         $concatSegmentParts .= Url::getRewriter()->normalize($dataset->getValue($relation->getAlias().'_segment_part_'.$index), $clangId);
                     }
                 }
@@ -350,12 +366,10 @@ class Profile
         }
 
         if ($this->appendUserPaths()) {
-            $userPaths = explode("\n", $this->appendUserPaths());
-            foreach ($userPaths as $userPathLine) {
-                $userPathParts = explode('=', $userPathLine);
-
+            $userPaths = $this->getUserPaths();
+            foreach ($userPaths as $userPath => $userPathLabel) {
                 $urlUserPath = clone $url;
-                $urlUserPath->appendPathSegments(explode('/', trim($userPathParts[0])), $clangId);
+                $urlUserPath->appendPathSegments(explode('/', $userPath), $clangId);
                 $urlObjects[] = [
                     'article_id' => $articleId,
                     'object' => $urlUserPath,
@@ -387,7 +401,7 @@ class Profile
                 $preSaveCalled = true;
             }
 
-            $urlAsString = $urlInstance->__toString();
+            $urlAsString = $urlInstance->toString();
             $manager = UrlManagerSql::factory();
             $manager->setArticleId($urlObject['article_id']);
             $manager->setClangId($urlObject['clang_id']);

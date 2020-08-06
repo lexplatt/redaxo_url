@@ -51,7 +51,11 @@ class ProfileRestriction
     {
         $value = $this->value;
         switch ($this->comparisonOperator) {
+            case '= ""':
+            case '!= ""':
             case 'FIND_IN_SET':
+            case 'IS NULL':
+            case 'IS NOT NULL':
                 break;
             case 'IN':
             case 'NOT IN':
@@ -83,6 +87,13 @@ class ProfileRestriction
         switch ($this->comparisonOperator) {
             case 'FIND_IN_SET':
                 $where = sprintf('%s (%s, %s)', $this->comparisonOperator, $value, $this->columnName);
+                break;
+
+            case '= ""':
+            case '!= ""':
+            case 'IS NULL':
+            case 'IS NOT NULL':
+                $where = sprintf('%s %s', $this->columnName, $this->comparisonOperator);
                 break;
 
             default:

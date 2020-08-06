@@ -110,6 +110,10 @@ class ExtensionPointManager
                 break;
 
             case 'CACHE_DELETED':
+                Cache::deleteProfiles();
+                $this->setMode(self::MODE_UPDATE_URL_ALL);
+                break;
+
             case 'CLANG_ADDED':
             case 'CLANG_STATUS':
             case 'CLANG_UPDATED':
@@ -134,11 +138,18 @@ class ExtensionPointManager
                     // Urls neu schreiben
                     $primaryKey = \rex_sql_table::get($tableName)->getPrimaryKey()[0];
 
-                    $this->setMode(self::MODE_UPDATE_URL_DATASET);
-                    $this->setDatasetEditMode($object->isEditMode());
-                    $this->setDatasetPrimaryId($object->getSql()->getValue($primaryKey));
-                    $this->setDatasetPrimaryColumnName($primaryKey);
-                    $this->setDatasetTableName($tableName);
+                    // kreatif: ohne try wirft es Fehler beim erstellen von Metainfos
+                    try {
+                        $this->setMode(self::MODE_UPDATE_URL_DATASET);
+                        $this->setDatasetEditMode($object->isEditMode());
+                        $this->setDatasetPrimaryId($object->getSql()->getValue($primaryKey));
+                        $this->setDatasetPrimaryColumnName($primaryKey);
+                        $this->setDatasetTableName($tableName);
+                    } catch (\rex_sql_exception $ex) {
+                        if ($ex->getMessage() != 'Unable to fetch row.') {
+                            throw new \rex_sql_exception($ex->getMessage(), $ex->getPrevious());
+                        }
+                    }
                 }
 
                 break;

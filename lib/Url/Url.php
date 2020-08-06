@@ -18,8 +18,7 @@ use Url\Rewriter\Rewriter;
 class Url
 {
     public $uri;
-
-    protected $handleRewriterSuffix = false;
+    public $requestUri;
 
     protected $sitemap = false;
     protected $sitemapLastmod = '';
@@ -33,6 +32,8 @@ class Url
     {
         // $this->uri = (new UriParser())->parse($url);
         $this->uri = (new Uri($url, UriParser::MODE_UTF8));
+        $this->requestUri = $this->uri;
+        $this->removeRewriterSuffix();
     }
 
     public function __call($method, $arguments)
@@ -43,19 +44,15 @@ class Url
     /**
      * @return string
      */
-    public function __toString()
+    public function toString()
     {
-        if ($this->handleRewriterSuffix) {
-            $this->appendRewriterSuffix();
-            $this->handleRewriterSuffix = false;
-        }
+        $this->appendRewriterSuffix();
         return $this->uri->__toString();
     }
 
-    public function handleRewriterSuffix()
+    public function getRequestPath()
     {
-        $this->handleRewriterSuffix = true;
-        $this->removeRewriterSuffix();
+        return $this->requestUri->getPath();
     }
 
     public function appendPathSegments(array $segments, $clangId = 1)
@@ -122,6 +119,7 @@ class Url
      */
     public function getPath()
     {
+        $this->appendRewriterSuffix();
         return $this->uri->getPath();
     }
 
@@ -136,9 +134,6 @@ class Url
     public function getSegment(int $index, $default = null)
     {
         $segments = $this->getSegments();
-        if ($index === 0) {
-            // throw InvalidArgument::segmentZeroDoesNotExist();
-        }
         if ($index < 0) {
             $segments = array_reverse($segments);
             $index = abs($index);
@@ -148,6 +143,7 @@ class Url
 
     public function getSegments()
     {
+        $this->appendRewriterSuffix();
         return $this->uri->getPathSegments();
     }
 
@@ -247,6 +243,7 @@ class Url
 
     protected function appendRewriterSuffix()
     {
+        $this->removeRewriterSuffix();
         return $this->uri = $this->uri->withPath($this->uri->getPath().self::$rewriter->getSuffix());
     }
 
@@ -267,7 +264,11 @@ class Url
             $sick = [$sick];
         }
 
+        $suffix = self::$rewriter->getSuffix();
         foreach ($sick as $index => $value) {
+            if (strlen($suffix) !== 0 && substr($value, (strlen($suffix) * -1)) == $suffix) {
+                $value = substr($value, 0, (strlen($suffix) * -1));
+            }
             $sick[$index] = self::$rewriter->normalize($value, $clangId);
         }
         return $sick;
