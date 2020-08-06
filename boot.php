@@ -23,25 +23,26 @@ if (null !== Url::getRewriter()) {
 
 rex_extension::register('PACKAGES_INCLUDED', function (\rex_extension_point $epPackagesIncluded) {
     // if anything changes -> refresh PathFile
+    $extensionPoints = [
+        'ART_ADDED', 'ART_DELETED', 'ART_MOVED', 'ART_STATUS', 'ART_UPDATED',
+        'CAT_ADDED', 'CAT_DELETED', 'CAT_MOVED', 'CAT_STATUS', 'CAT_UPDATED',
+        'CLANG_ADDED', 'CLANG_DELETED','CLANG_UPDATED',
+        'CACHE_DELETED',
+        'REX_FORM_SAVED',
+        'REX_YFORM_SAVED',
+        'YFORM_DATA_ADDED', 'YFORM_DATA_DELETED', 'YFORM_DATA_UPDATED', 'YFORM_DATA_STATUS_CHANGED',
+    ];
+
+    foreach ($extensionPoints as $extensionPoint) {
+        rex_extension::register($extensionPoint, function (\rex_extension_point $ep) {
+            $manager = new ExtensionPointManager($ep);
+            $generator = new Generator($manager);
+            $generator->execute();
+        }, rex_extension::LATE);
+    }
+
+    // kreatif: if moved down to this position to exectue extension point also in frontend
     if (rex::isBackend() && rex::getUser()) {
-        $extensionPoints = [
-            'ART_ADDED', 'ART_DELETED', 'ART_MOVED', 'ART_STATUS', 'ART_UPDATED',
-            'CAT_ADDED', 'CAT_DELETED', 'CAT_MOVED', 'CAT_STATUS', 'CAT_UPDATED',
-            'CLANG_ADDED', 'CLANG_DELETED','CLANG_UPDATED',
-            'CACHE_DELETED',
-            'REX_FORM_SAVED',
-            'REX_YFORM_SAVED',
-            'YFORM_DATA_ADDED', 'YFORM_DATA_DELETED', 'YFORM_DATA_UPDATED', 'YFORM_DATA_STATUS_CHANGED',
-        ];
-
-        foreach ($extensionPoints as $extensionPoint) {
-            rex_extension::register($extensionPoint, function (\rex_extension_point $ep) {
-                $manager = new ExtensionPointManager($ep);
-                $generator = new Generator($manager);
-                $generator->execute();
-            }, rex_extension::LATE);
-        }
-
         $profileArticleIds = Profile::getAllArticleIds();
 
         // Profilartikel nicht löschen
