@@ -99,6 +99,10 @@ class UrlManagerSql
      */
     public function setUrl($url)
     {
+        // kreatif: host generalization added
+        if (\rex::isDebugMode()) {
+            $url = '//domain'. substr($url, strpos($url, '/', 3));
+        }
         $this->sql->setValue('url', $url);
         $this->sql->setValue('url_hash', sha1($url));
         $this->where['url'] = $url;
@@ -220,7 +224,12 @@ class UrlManagerSql
     public static function getByProfileId($profileId)
     {
         $sql = self::factory();
-        return $sql->sql->getArray('SELECT * FROM '.\rex::getTable(self::TABLE_NAME).' WHERE `profile_id` = ?', [$profileId]);
+        // kreatif: host generalization added
+        if (\rex::isDebugMode() && $host = \rex_yrewrite::getCurrentDomain()->getHost()) {
+            return $sql->sql->getArray('SELECT *, REPLACE(url, "//domain/", "//'. $host .'/") AS url FROM '.\rex::getTable(self::TABLE_NAME).' WHERE `profile_id` = ?', [$profileId]);
+        } else {
+            return $sql->sql->getArray('SELECT * FROM '.\rex::getTable(self::TABLE_NAME).' WHERE `profile_id` = ?', [$profileId]);
+        }
     }
 
     /**
@@ -246,7 +255,12 @@ class UrlManagerSql
         ], $clangIds);
 
         $sql = self::factory();
-        return $sql->sql->getArray('SELECT * FROM '.\rex::getTable(self::TABLE_NAME).' WHERE `data_id` = ? AND `article_id` = ? AND is_user_path = ? AND is_structure = ? AND ('.$where.')', $params);
+        // kreatif: host generalization added
+        if (\rex::isDebugMode() && $host = \rex_yrewrite::getCurrentDomain()->getHost()) {
+            return $sql->sql->getArray('SELECT *, REPLACE(url, "//domain/", "//'. $host .'/") AS url FROM '.\rex::getTable(self::TABLE_NAME).' WHERE `data_id` = ? AND `article_id` = ? AND is_user_path = ? AND is_structure = ? AND ('.$where.')', $params);
+        } else {
+            return $sql->sql->getArray('SELECT * FROM '.\rex::getTable(self::TABLE_NAME).' WHERE `data_id` = ? AND `article_id` = ? AND is_user_path = ? AND is_structure = ? AND ('.$where.')', $params);
+        }
     }
 
     /**
@@ -261,7 +275,12 @@ class UrlManagerSql
     public static function getOrigin(Profile $profile, $datasetId, $clangId)
     {
         $sql = self::factory();
-        return $sql->sql->getArray('SELECT * FROM '.\rex::getTable(self::TABLE_NAME).' WHERE `profile_id` = ? AND `data_id` = ? AND `clang_id` = ? AND is_user_path = ? AND is_structure = ?', [$profile->getId(), $datasetId, $clangId, 0, 0]);
+        // kreatif: host generalization added
+        if (\rex::isDebugMode() && $host = \rex_yrewrite::getCurrentDomain()->getHost()) {
+            return $sql->sql->getArray('SELECT *, REPLACE(url, "//domain/", "//'. $host .'/") AS url FROM '.\rex::getTable(self::TABLE_NAME).' WHERE `profile_id` = ? AND `data_id` = ? AND `clang_id` = ? AND is_user_path = ? AND is_structure = ?', [$profile->getId(), $datasetId, $clangId, 0, 0]);
+        } else {
+            return $sql->sql->getArray('SELECT * FROM '.\rex::getTable(self::TABLE_NAME).' WHERE `profile_id` = ? AND `data_id` = ? AND `clang_id` = ? AND is_user_path = ? AND is_structure = ?', [$profile->getId(), $datasetId, $clangId, 0, 0]);
+        }
     }
 
     /**
@@ -276,7 +295,12 @@ class UrlManagerSql
     public static function getOriginAndExpanded(Profile $profile, $datasetId, $clangId)
     {
         $sql = self::factory();
-        return $sql->sql->getArray('SELECT * FROM '.\rex::getTable(self::TABLE_NAME).' WHERE `profile_id` = ? AND `data_id` = ? AND `clang_id` = ?', [$profile->getId(), $datasetId, $clangId]);
+        // kreatif: host generalization added
+        if (\rex::isDebugMode() && $host = \rex_yrewrite::getCurrentDomain()->getHost()) {
+            return $sql->sql->getArray('SELECT *, REPLACE(url, "//domain/", "//'. $host .'/") AS url FROM '.\rex::getTable(self::TABLE_NAME).' WHERE `profile_id` = ? AND `data_id` = ? AND `clang_id` = ?', [$profile->getId(), $datasetId, $clangId]);
+        } else {
+            return $sql->sql->getArray('SELECT * FROM '.\rex::getTable(self::TABLE_NAME).' WHERE `profile_id` = ? AND `data_id` = ? AND `clang_id` = ?', [$profile->getId(), $datasetId, $clangId]);
+        }
     }
 
     /**
@@ -294,7 +318,13 @@ class UrlManagerSql
         $urlAsString = $this_url->toString();
 
         $sql = self::factory();
-        return $sql->sql->getArray('SELECT * FROM '.\rex::getTable(self::TABLE_NAME).' WHERE `url` = ?', [$urlAsString]);
+        // kreatif: host generalization added
+        if (\rex::isDebugMode() && $host = \rex_yrewrite::getCurrentDomain()->getHost()) {
+            $urlAsString = '//domain'. substr($urlAsString, strpos($urlAsString, '/', 3));
+            return $sql->sql->getArray('SELECT *, REPLACE(url, "//domain/", "//'. $host .'/") AS url FROM '.\rex::getTable(self::TABLE_NAME).' WHERE `url` = ?', [$urlAsString]);
+        } else {
+            return $sql->sql->getArray('SELECT * FROM '.\rex::getTable(self::TABLE_NAME).' WHERE `url` = ?', [$urlAsString]);
+        }
     }
 
     public static function triggerTableUpdated()
