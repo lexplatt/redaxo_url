@@ -31,7 +31,12 @@ class Url
     public function __construct($url)
     {
         // $this->uri = (new UriParser())->parse($url);
-        $this->uri = (new Uri($url, UriParser::MODE_UTF8));
+        // kreatif: try-catch added to catch malformed uris
+        try {
+            $this->uri = (new Uri($url, UriParser::MODE_UTF8));
+        } catch (\InvalidArgumentException $ex) {
+            $this->uri = new Uri();
+        }
         $this->requestUri = $this->uri;
         $this->removeRewriterSuffix();
     }
