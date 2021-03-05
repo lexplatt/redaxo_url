@@ -11,6 +11,9 @@
 
 namespace Url;
 
+use Kreatif\Project\Insertion;
+
+
 class Profile
 {
     const TABLE_NAME = 'url_generator_profile';
@@ -175,7 +178,9 @@ class Profile
 
     public function getRestrictions()
     {
-        return $this->table['restrictions'];
+        return \rex_extension::registerPoint(new \rex_extension_point('URL_GET_RESTRICTIONS', $this->table['restrictions'], [
+            'profile' => $this
+        ]));
     }
 
     /**
@@ -625,9 +630,10 @@ class Profile
         if ($this->hasRestrictions()) {
             $where = [];
             foreach ($this->getRestrictions() as $index => $values) {
+                $column = $values['column'] ? sprintf('%s.%s', self::ALIAS, $values['column']) : $this->getColumnNameWithAlias('restriction_'.$index);
                 $restriction = new ProfileRestriction(
                     $index,
-                    $this->getColumnNameWithAlias('restriction_'.$index),
+                    $column,
                     $values['comparison_operator'],
                     $values['value'],
                     ($values['logical_operator'] ?? '')
