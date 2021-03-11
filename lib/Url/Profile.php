@@ -425,7 +425,11 @@ class Profile
                 $manager->setLastmod($dataset->getValue(self::ALIAS.'_sitemap_lastmod'));
             }
 
-            if (!$manager->save()) {
+            if ($manager->save()) {
+                $urlObject['saved_url'] = $manager->getWhere('url');
+                $urlObject['url_hash'] = sha1($urlObject['saved_url']);
+                \rex_extension::registerPoint(new \rex_extension_point('URL_SAVED', $urlInstance, $urlObject));
+            } else {
                 // $return[] = $urlAsString;
             }
         }

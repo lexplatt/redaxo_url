@@ -101,7 +101,13 @@ class UrlManagerSql
     {
         // kreatif: host generalization added
         if (\rex::isDebugMode()) {
-            $url = '//domain'. substr($url, strpos($url, '/', 3));
+            if (\rex_addon::get('yrewrite')->isAvailable() && $domain = \rex_yrewrite::getCurrentDomain()) {
+                $_url = parse_url($domain->getUrl());
+            } else {
+                $_url = parse_url(\rex::getServer());
+            }
+            $replace = '//' . $_url['host'] . $_url['path'];
+            $url     = str_replace($replace, '//domain/', $url);
         }
         $this->sql->setValue('url', $url);
         $this->sql->setValue('url_hash', sha1($url));
@@ -135,6 +141,11 @@ class UrlManagerSql
         }
         $this->sql->setValue('lastmod', date(DATE_W3C, $value));
         $this->where['lastmod'] = date(DATE_W3C, $value);
+    }
+
+    public function getWhere($key)
+    {
+        return $this->where[$key];
     }
 
     /**
@@ -209,6 +220,12 @@ class UrlManagerSql
     {
         $sql = self::factory();
         $sql->sql->setWhere('profile_id = ? AND data_id = ?', [$profileId, $datasetId]);
+        $sql->sql->select();
+
+        \rex_extension::registerPoint(new \rex_extension_point('URL_DELETE', $sql->sql->getArray()));
+
+        $sql->sql->setTable(\rex::getTable(self::TABLE_NAME));
+        $sql->sql->setWhere('profile_id = ? AND data_id = ?', [$profileId, $datasetId]);
         $sql->sql->delete();
 
         self::triggerTableUpdated();
@@ -225,8 +242,9 @@ class UrlManagerSql
     {
         $sql = self::factory();
         // kreatif: host generalization added
-        if (\rex::isDebugMode() && $host = \rex_yrewrite::getCurrentDomain()->getHost()) {
-            return $sql->sql->getArray('SELECT *, REPLACE(url, "//domain/", "//'. $host .'/") AS url FROM '.\rex::getTable(self::TABLE_NAME).' WHERE `profile_id` = ?', [$profileId]);
+        if (\rex::isDebugMode() && $domain = \rex_yrewrite::getCurrentDomain()) {
+            $replace = $domain->getHost() . $domain->getPath();
+            return $sql->sql->getArray('SELECT *, REPLACE(url, "//domain/", "//' . $replace . '") AS url FROM ' . \rex::getTable(self::TABLE_NAME) . ' WHERE `profile_id` = ?', [$profileId]);
         } else {
             return $sql->sql->getArray('SELECT * FROM '.\rex::getTable(self::TABLE_NAME).' WHERE `profile_id` = ?', [$profileId]);
         }
@@ -256,8 +274,9 @@ class UrlManagerSql
 
         $sql = self::factory();
         // kreatif: host generalization added
-        if (\rex::isDebugMode() && $host = \rex_yrewrite::getCurrentDomain()->getHost()) {
-            return $sql->sql->getArray('SELECT *, REPLACE(url, "//domain/", "//'. $host .'/") AS url FROM '.\rex::getTable(self::TABLE_NAME).' WHERE `data_id` = ? AND `article_id` = ? AND is_user_path = ? AND is_structure = ? AND ('.$where.')', $params);
+        if (\rex::isDebugMode() && $domain = \rex_yrewrite::getCurrentDomain()) {
+            $replace = $domain->getHost() . $domain->getPath();
+            return $sql->sql->getArray('SELECT *, REPLACE(url, "//domain/", "//' . $replace . '") AS url FROM ' . \rex::getTable(self::TABLE_NAME) . ' WHERE `data_id` = ? AND `article_id` = ? AND is_user_path = ? AND is_structure = ? AND (' . $where . ')', $params);
         } else {
             return $sql->sql->getArray('SELECT * FROM '.\rex::getTable(self::TABLE_NAME).' WHERE `data_id` = ? AND `article_id` = ? AND is_user_path = ? AND is_structure = ? AND ('.$where.')', $params);
         }
@@ -276,8 +295,9 @@ class UrlManagerSql
     {
         $sql = self::factory();
         // kreatif: host generalization added
-        if (\rex::isDebugMode() && $host = \rex_yrewrite::getCurrentDomain()->getHost()) {
-            return $sql->sql->getArray('SELECT *, REPLACE(url, "//domain/", "//'. $host .'/") AS url FROM '.\rex::getTable(self::TABLE_NAME).' WHERE `profile_id` = ? AND `data_id` = ? AND `clang_id` = ? AND is_user_path = ? AND is_structure = ?', [$profile->getId(), $datasetId, $clangId, 0, 0]);
+        if (\rex::isDebugMode() && $domain = \rex_yrewrite::getCurrentDomain()) {
+            $replace = $domain->getHost() . $domain->getPath();
+            return $sql->sql->getArray('SELECT *, REPLACE(url, "//domain/", "//' . $replace . '") AS url FROM ' . \rex::getTable(self::TABLE_NAME) . ' WHERE `profile_id` = ? AND `data_id` = ? AND `clang_id` = ? AND is_user_path = ? AND is_structure = ?', [$profile->getId(), $datasetId, $clangId, 0, 0]);
         } else {
             return $sql->sql->getArray('SELECT * FROM '.\rex::getTable(self::TABLE_NAME).' WHERE `profile_id` = ? AND `data_id` = ? AND `clang_id` = ? AND is_user_path = ? AND is_structure = ?', [$profile->getId(), $datasetId, $clangId, 0, 0]);
         }
@@ -296,8 +316,9 @@ class UrlManagerSql
     {
         $sql = self::factory();
         // kreatif: host generalization added
-        if (\rex::isDebugMode() && $host = \rex_yrewrite::getCurrentDomain()->getHost()) {
-            return $sql->sql->getArray('SELECT *, REPLACE(url, "//domain/", "//'. $host .'/") AS url FROM '.\rex::getTable(self::TABLE_NAME).' WHERE `profile_id` = ? AND `data_id` = ? AND `clang_id` = ?', [$profile->getId(), $datasetId, $clangId]);
+        if (\rex::isDebugMode() && $domain = \rex_yrewrite::getCurrentDomain()) {
+            $replace = $domain->getHost() . $domain->getPath();
+            return $sql->sql->getArray('SELECT *, REPLACE(url, "//domain/", "//' . $replace . '") AS url FROM ' . \rex::getTable(self::TABLE_NAME) . ' WHERE `profile_id` = ? AND `data_id` = ? AND `clang_id` = ?', [$profile->getId(), $datasetId, $clangId]);
         } else {
             return $sql->sql->getArray('SELECT * FROM '.\rex::getTable(self::TABLE_NAME).' WHERE `profile_id` = ? AND `data_id` = ? AND `clang_id` = ?', [$profile->getId(), $datasetId, $clangId]);
         }
@@ -319,9 +340,16 @@ class UrlManagerSql
 
         $sql = self::factory();
         // kreatif: host generalization added
-        if (\rex::isDebugMode() && $host = \rex_yrewrite::getCurrentDomain()->getHost()) {
-            $urlAsString = '//domain'. substr($urlAsString, strpos($urlAsString, '/', 3));
-            return $sql->sql->getArray('SELECT *, REPLACE(url, "//domain/", "//'. $host .'/") AS url FROM '.\rex::getTable(self::TABLE_NAME).' WHERE `url` = ?', [$urlAsString]);
+        if (\rex::isDebugMode() && $domain = \rex_yrewrite::getCurrentDomain()) {
+            if (\rex_addon::get('yrewrite')->isAvailable() && $domain = \rex_yrewrite::getCurrentDomain()) {
+                $_url = parse_url($domain->getUrl());
+            } else {
+                $_url = parse_url(\rex::getServer());
+            }
+            $replace     = '//' . $_url['host'] . $_url['path'];
+            $urlAsString = str_replace($replace, '//domain/', $urlAsString);
+            $replace     = $domain->getHost() . $domain->getPath();
+            return $sql->sql->getArray('SELECT *, REPLACE(url, "//domain/", "//' . $replace . '") AS url FROM ' . \rex::getTable(self::TABLE_NAME) . ' WHERE `url` = ?', [$urlAsString]);
         } else {
             return $sql->sql->getArray('SELECT * FROM '.\rex::getTable(self::TABLE_NAME).' WHERE `url` = ?', [$urlAsString]);
         }
