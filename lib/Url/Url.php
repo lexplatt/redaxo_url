@@ -30,7 +30,6 @@ class Url
 
     public function __construct($url)
     {
-        // $this->uri = (new UriParser())->parse($url);
         // kreatif: try-catch added to catch malformed uris
         try {
             $this->uri = (new Uri($url, UriParser::MODE_UTF8));

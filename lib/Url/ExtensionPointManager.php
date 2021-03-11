@@ -136,7 +136,6 @@ class ExtensionPointManager
                 } else {
                     // Datensatz wurde aktualisiert
                     // Urls neu schreiben
-
                     $profiles = Profile::getByTableName($tableName);
                     if (empty($profiles)) {
                         break;
@@ -148,9 +147,10 @@ class ExtensionPointManager
 
                     // kreatif: ohne try wirft es Fehler beim erstellen von Metainfos
                     try {
+                        $primaryId = $object->isEditMode() ? $object->getSql()->getValue($primaryKey) : $object->getSql()->getLastId();
                         $this->setMode(self::MODE_UPDATE_URL_DATASET);
                         $this->setDatasetEditMode($object->isEditMode());
-                        $this->setDatasetPrimaryId($object->getSql()->getValue($primaryKey));
+                        $this->setDatasetPrimaryId($primaryId);
                         $this->setDatasetPrimaryColumnName($primaryKey);
                         $this->setDatasetTableName($tableName);
                     } catch (\rex_sql_exception $ex) {
