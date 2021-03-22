@@ -241,13 +241,21 @@ class UrlManagerSql
     public static function getByProfileId($profileId)
     {
         $sql = self::factory();
+        $query = \rex_yform_manager_query::get(\rex::getTable(self::TABLE_NAME));
+        $query->alias('m');
+
         // kreatif: host generalization added
         if (\rex::isDebugMode() && $domain = \rex_yrewrite::getCurrentDomain()) {
             $replace = $domain->getHost() . $domain->getPath();
-            return $sql->sql->getArray('SELECT *, REPLACE(url, "//domain/", "//' . $replace . '") AS url FROM ' . \rex::getTable(self::TABLE_NAME) . ' WHERE `profile_id` = ?', [$profileId]);
-        } else {
-            return $sql->sql->getArray('SELECT * FROM '.\rex::getTable(self::TABLE_NAME).' WHERE `profile_id` = ?', [$profileId]);
+            $query->selectRaw("REPLACE(url, '//domain/', '//{$replace}') AS url");
         }
+        $query->where('profile_id', $profileId);
+        $query->orderBy('id');
+
+        $query = \rex_extension::registerPoint(new \rex_extension_point('URL_GET_BY_PROFILE_ID', $query, [
+            'profileId' => $profileId
+        ]));
+        return $sql->sql->getArray($query->getQuery(), $query->getParams());
     }
 
     /**
