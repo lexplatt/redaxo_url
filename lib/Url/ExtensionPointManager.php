@@ -166,7 +166,8 @@ class ExtensionPointManager
                 // dump($this->extensionPoint->getParams());
                 // Domain wurde angelegt/aktualisiert
                 if ($this->extensionPoint->getParam('table') == 'rex_yrewrite_domain') {
-                    $this->setMode(self::MODE_UPDATE_URL_ALL);
+                    // $this->setMode(self::MODE_UPDATE_URL_ALL);
+                    rex_delete_cache();
                 }
                 break;
 
