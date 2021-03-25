@@ -380,7 +380,7 @@ class UrlManager
             }
             foreach ($profiles as $profile) {
                 // Prüfen ob der Url-Param in einem Profil hinterlegt wurde
-                if ($urlParamKey != $profile->getNamespace() || ($clangId && $clangId != $profile->getArticleClangId())) {
+                if ($urlParamKey != $profile->getNamespace() || ($profile->getArticleClangId() != null && $clangId && $clangId != $profile->getArticleClangId())) {
                     continue;
                 }
 
